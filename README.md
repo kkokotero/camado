@@ -144,6 +144,45 @@ class App extends BaseComponent {
 mount(document.body, App.component());
 ```
 
+#### `create` and `component`
+
+`MyComponent.create({...})` creates the element immediately and applies the passed props during creation. `MyComponent.component()` returns a callable factory, so you can store it and invoke it with props later.
+
+Example:
+
+```ts
+import { BaseComponent, Component } from "camado/core";
+
+@Component({ selector: "app-card" })
+class AppCard extends BaseComponent {
+  title = "Untitled";
+
+  protected override render() {
+    return this.title;
+  }
+}
+
+const direct = AppCard.create({ title: "Created with props" });
+```
+
+Example:
+
+```ts
+import { BaseComponent, Component } from "camado/core";
+
+@Component({ selector: "app-card" })
+class AppCard extends BaseComponent {
+  title = "Untitled";
+
+  protected override render() {
+    return this.title;
+  }
+}
+
+const Card = AppCard.component();
+const viaFactory = Card({ title: "Invoked with props" });
+```
+
 #### `mount`
 
 `mount(target, component)` appends a component factory or constructor to a DOM target.
