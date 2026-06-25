@@ -250,7 +250,7 @@ test("BaseComponent collapses recursive update bursts into one follow-up pass", 
 
 		loop.count = 1;
 		await Promise.resolve();
-		await Promise.resolve();
+		await new Promise((resolve) => setTimeout(resolve, 0));
 
 		expect(loop.updates).toBe(2);
 		expect(loop.count).toBe(3);
