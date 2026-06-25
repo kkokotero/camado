@@ -180,7 +180,7 @@ function createMockElement() {
 	return api;
 }
 
-test("Transition.name integrates with Ustro elements", () => {
+test("Transition.name integrates with Miora elements", () => {
 	const previousDocument = globalThis.document;
 	const element = createMockElement();
 	const styleElement = createMockElement();

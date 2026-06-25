@@ -1,6 +1,6 @@
-# Ustro Vite Example
+# Miora Vite Example
 
-A minimal Vite example for the current `ustro` package.
+A minimal Vite example for the current `miora` package.
 
 ## Run
 

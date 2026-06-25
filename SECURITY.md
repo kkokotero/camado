@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-`ustro` is still evolving quickly.
+`miora` is still evolving quickly.
 
 At the moment, security fixes are only guaranteed for:
 
@@ -65,7 +65,7 @@ Once a fix is available, the project may publish:
 
 ## Security Design Notes
 
-`ustro` tries to reduce risk by:
+`miora` tries to reduce risk by:
 
 - keeping the runtime surface relatively small and dependency-light
 - validating inputs explicitly

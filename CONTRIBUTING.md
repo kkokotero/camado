@@ -1,6 +1,6 @@
-# Contributing to Ustro
+# Contributing to Miora
 
-Thank you for contributing to `ustro`.
+Thank you for contributing to `miora`.
 
 The goal of this project is to keep a modern TypeScript-first UI/runtime toolkit small, understandable, fast, and pleasant to use. Contributions that improve correctness, documentation, examples, tests, performance, and API clarity are welcome.
 
@@ -117,7 +117,7 @@ Feedback is meant to improve the project, not to discourage contributors. Questi
 
 ## Need Help?
 
-If you are unsure whether an idea fits `ustro`, open an issue and describe:
+If you are unsure whether an idea fits `miora`, open an issue and describe:
 
 - the use case
 - the proposed API or behavior

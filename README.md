@@ -1,28 +1,28 @@
 <p align="center" style="background-color: #fff;">
-  <img src="misc/banner.svg" alt="Ustro" />
+  <img src="misc/banner.svg" alt="Miora" />
 </p>
 
 <p align="center">
   <a href="./LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="license" />
   </a>
-  <a href="https://npmjs.org/package/ustro">
-    <img src="https://badgen.now.sh/npm/v/ustro" alt="version" />
+  <a href="https://npmjs.org/package/miora">
+    <img src="https://badgen.now.sh/npm/v/miora" alt="version" />
   </a>
-  <a href="https://npmjs.org/package/ustro">
-    <img src="https://badgen.now.sh/npm/dm/ustro" alt="downloads" />
+  <a href="https://npmjs.org/package/miora">
+    <img src="https://badgen.now.sh/npm/dm/miora" alt="downloads" />
   </a>
-  <a href="https://packagephobia.now.sh/result?p=ustro">
-    <img src="https://img.shields.io/bundlephobia/min/ustro" alt="Bundle Size" />
+  <a href="https://packagephobia.now.sh/result?p=miora">
+    <img src="https://img.shields.io/bundlephobia/min/miora" alt="Bundle Size" />
   </a>
-  <a href="https://bundlephobia.com/result?p=ustro">
-    <img src="https://img.shields.io/bundlephobia/minzip/ustro" alt="Bundle Size (gzip)" />
+  <a href="https://bundlephobia.com/result?p=miora">
+    <img src="https://img.shields.io/bundlephobia/minzip/miora" alt="Bundle Size (gzip)" />
   </a>
 </p>
 
-# Ustro
+# Miora
 
-Ustro is a TypeScript UI framework built on native DOM, fine-grained reactivity, and Web Components.
+Miora is a TypeScript UI framework built on native DOM, fine-grained reactivity, and Web Components.
 
 No JSX.
 No Virtual DOM.
@@ -31,14 +31,14 @@ No HTML templates.
 Just TypeScript DOM composition.
 It is ESM-only, tree-shakeable, and split into focused subpath exports.
 
-Ustro is inspired by Lit's small, composable rendering model and Angular's structured component ergonomics.
+Miora is inspired by Lit's small, composable rendering model and Angular's structured component ergonomics.
 It aims to make UI construction simpler and more visual, with a 1:1 mapping between the code tree and the rendered HTML/SVG tree.
 That means the source stays close to what you see on screen: same nesting, same order, same hierarchy.
 
 ## Install
 
 ```bash
-npm install ustro
+npm install miora
 ```
 
 ## Build
@@ -62,18 +62,18 @@ npm run build
 
 The package is organized by concern:
 
-- Runtime: `ustro/core`, `ustro/control`, `ustro/navigator`, `ustro/reactive`, `ustro/storage`, `ustro/validator`
-- DOM factories: `ustro/html`, `ustro/svg`
-- DOM modifiers: `ustro/modifiers`
-- Value helpers: `ustro/unit`
+- Runtime: `miora/core`, `miora/control`, `miora/navigator`, `miora/reactive`, `miora/storage`, `miora/validator`
+- DOM factories: `miora/html`, `miora/svg`
+- DOM modifiers: `miora/modifiers`
+- Value helpers: `miora/unit`
 
 ## Quick Example
 
 ```ts
-import { Component, BaseComponent, mount } from "ustro/core";
-import { Button, Div, H1 } from "ustro/html";
-import { Reactive } from "ustro/reactive";
-import { Event } from "ustro/modifiers";
+import { Component, BaseComponent, mount } from "miora/core";
+import { Button, Div, H1 } from "miora/html";
+import { Reactive } from "miora/reactive";
+import { Event } from "miora/modifiers";
 
 @Component({ selector: "counter-card" })
 class Counter extends BaseComponent {
@@ -93,7 +93,7 @@ mount(document.body, Counter.component());
 
 ## Why this API
 
-Ustro builds HTML and SVG with factories instead of JSX or a template compiler for a few reasons:
+Miora builds HTML and SVG with factories instead of JSX or a template compiler for a few reasons:
 
 - the tree in code mirrors the tree in the DOM 1:1, so it is easier to read and reason about
 - UI construction stays simpler and more visual because each node is created in the same order it appears in the rendered tree
@@ -101,9 +101,9 @@ Ustro builds HTML and SVG with factories instead of JSX or a template compiler f
 - modifiers stay separate from element creation, so attributes, styles, events, and observers compose cleanly
 - the API keeps Lit's power for building UI from code, while still providing higher-level composition primitives and direct DOM access when you need it
 - the API keeps Angular's order and hierarchy for structured components, but without Angular's ergonomics tax or framework weight
-- the web is already complex enough; Ustro avoids adding more complexity unless it clearly pays for itself
+- the web is already complex enough; Miora avoids adding more complexity unless it clearly pays for itself
 
-Templates would be a valid alternative, but they tend to split logic across markup and runtime rules. JSX would also work, but it usually adds a different authoring convention and often nudges the project toward a React-style mental model. Ustro keeps the tree in code so the component graph, modifiers, and control flow stay in one place.
+Templates would be a valid alternative, but they tend to split logic across markup and runtime rules. JSX would also work, but it usually adds a different authoring convention and often nudges the project toward a React-style mental model. Miora keeps the tree in code so the component graph, modifiers, and control flow stay in one place.
 
 ## How the Pieces Fit Together
 
@@ -131,13 +131,13 @@ Main exports:
 Example:
 
 ```ts
-import { BaseComponent, Component, mount } from "ustro/core";
-import { H1 } from "ustro/html";
+import { BaseComponent, Component, mount } from "miora/core";
+import { H1 } from "miora/html";
 
 @Component({ selector: "app-root" })
 class App extends BaseComponent {
   protected override render() {
-    return H1("Hello from Ustro");
+    return H1("Hello from Miora");
   }
 }
 
@@ -151,13 +151,13 @@ mount(document.body, App.component());
 Example:
 
 ```ts
-import { BaseComponent, Component, mount } from "ustro/core";
-import { H1 } from "ustro/html";
+import { BaseComponent, Component, mount } from "miora/core";
+import { H1 } from "miora/html";
 
 @Component({ selector: "app-root" })
 class App extends BaseComponent {
   protected override render() {
-    return H1("Hello from Ustro");
+    return H1("Hello from Miora");
   }
 }
 
@@ -171,7 +171,7 @@ mount(document.body, App.component());
 Example:
 
 ```ts
-import { BaseComponent, Component, prepare } from "ustro/core";
+import { BaseComponent, Component, prepare } from "miora/core";
 
 @Component({ selector: "app-root" })
 class App extends BaseComponent {
@@ -191,7 +191,7 @@ console.log(manifest.selectors["app-root"]);
 Create a binder with `BaseBinder`:
 
 ```ts
-import { BaseBinder } from "ustro/core";
+import { BaseBinder } from "miora/core";
 
 class CounterBinder extends BaseBinder<{ changed: number }> {
   bump(value: number) {
@@ -203,8 +203,8 @@ class CounterBinder extends BaseBinder<{ changed: number }> {
 Use it from a component:
 
 ```ts
-import { BaseComponent, Bind, Component, mount } from "ustro/core";
-import { H1 } from "ustro/html";
+import { BaseComponent, Bind, Component, mount } from "miora/core";
+import { H1 } from "miora/html";
 
 @Component({ selector: "app-root" })
 class App extends BaseComponent {
@@ -218,7 +218,7 @@ class App extends BaseComponent {
   }
 
   protected override render() {
-    return H1("Hello from Ustro");
+    return H1("Hello from Miora");
   }
 }
 
@@ -230,7 +230,7 @@ mount(document.body, App.component());
 `Channel` is the tiny typed event bus that binders expose.
 
 ```ts
-import { Channel } from "ustro/core";
+import { Channel } from "miora/core";
 
 const channel = new Channel<{ ping: number }>();
 channel.on("ping", (value) => console.log(value));
@@ -244,7 +244,7 @@ channel.emit("ping", 1);
 Example:
 
 ```ts
-import { BaseComponent, Component, Property } from "ustro/core";
+import { BaseComponent, Component, Property } from "miora/core";
 
 @Component({ selector: "profile-card" })
 class ProfileCard extends BaseComponent {
@@ -264,7 +264,7 @@ class ProfileCard extends BaseComponent {
 Example:
 
 ```ts
-import { BaseComponent, Component, Output } from "ustro/core";
+import { BaseComponent, Component, Output } from "miora/core";
 
 @Component({ selector: "profile-card" })
 class ProfileCard extends BaseComponent {
@@ -286,7 +286,7 @@ class ProfileCard extends BaseComponent {
 Example:
 
 ```ts
-import { BaseComponent, Component, Static } from "ustro/core";
+import { BaseComponent, Component, Static } from "miora/core";
 
 @Component({ selector: "profile-card" })
 class ProfileCard extends BaseComponent {
@@ -303,13 +303,13 @@ class ProfileCard extends BaseComponent {
 
 #### `@Reactive`
 
-`@Reactive()` (from `ustro/reactive`) marks fine-grained state that should rerender the component when it changes.
+`@Reactive()` (from `miora/reactive`) marks fine-grained state that should rerender the component when it changes.
 
 Example:
 
 ```ts
-import { BaseComponent, Component } from "ustro/core";
-import { Reactive } from "ustro/reactive";
+import { BaseComponent, Component } from "miora/core";
+import { Reactive } from "miora/reactive";
 
 @Component({ selector: "counter-card" })
 class CounterCard extends BaseComponent {
@@ -329,7 +329,7 @@ class CounterCard extends BaseComponent {
 Example:
 
 ```ts
-import { BaseComponent, Component, OnMount } from "ustro/core";
+import { BaseComponent, Component, OnMount } from "miora/core";
 
 @Component({ selector: "timed-card" })
 class TimedCard extends BaseComponent {
@@ -351,7 +351,7 @@ class TimedCard extends BaseComponent {
 Example:
 
 ```ts
-import { BaseComponent, Component, OnDestroy } from "ustro/core";
+import { BaseComponent, Component, OnDestroy } from "miora/core";
 
 @Component({ selector: "timed-card" })
 class TimedCard extends BaseComponent {
@@ -373,7 +373,7 @@ class TimedCard extends BaseComponent {
 Example:
 
 ```ts
-import { BaseComponent, Component, Delay } from "ustro/core";
+import { BaseComponent, Component, Delay } from "miora/core";
 
 @Component({ selector: "timed-card" })
 class TimedCard extends BaseComponent {
@@ -395,7 +395,7 @@ class TimedCard extends BaseComponent {
 Example:
 
 ```ts
-import { BaseComponent, Component, Interval } from "ustro/core";
+import { BaseComponent, Component, Interval } from "miora/core";
 
 @Component({ selector: "timed-card" })
 class TimedCard extends BaseComponent {
@@ -417,8 +417,8 @@ class TimedCard extends BaseComponent {
 Example:
 
 ```ts
-import { BaseComponent, Children, Component } from "ustro/core";
-import { Div, H1 } from "ustro/html";
+import { BaseComponent, Children, Component } from "miora/core";
+import { Div, H1 } from "miora/html";
 
 @Component({ selector: "card-shell" })
 class CardShell extends BaseComponent {
@@ -438,8 +438,8 @@ class CardShell extends BaseComponent {
 Example:
 
 ```ts
-import { BaseComponent, Component, Slot } from "ustro/core";
-import { Div, Footer, H1 } from "ustro/html";
+import { BaseComponent, Component, Slot } from "miora/core";
+import { Div, Footer, H1 } from "miora/html";
 
 @Component({ selector: "card-shell" })
 class CardShell extends BaseComponent {
@@ -459,9 +459,9 @@ class CardShell extends BaseComponent {
 Example:
 
 ```ts
-import { Ref } from "ustro/core";
-import { Attributes } from "ustro/modifiers";
-import { Input } from "ustro/html";
+import { Ref } from "miora/core";
+import { Attributes } from "miora/modifiers";
+import { Input } from "miora/html";
 
 const inputRef = Ref<HTMLInputElement>();
 
@@ -485,8 +485,8 @@ Main exports:
 Example:
 
 ```ts
-import { Div, Span } from "ustro/html";
-import { Each, When } from "ustro/control";
+import { Div, Span } from "miora/html";
+import { Each, When } from "miora/control";
 
 const items = ["alpha", "beta", "gamma"];
 
@@ -506,18 +506,18 @@ Main exports:
 - `Fragment`
 - `Text`
 
-Factories accept children only. Use `ustro/modifiers` for attributes, events, and styles. This keeps element construction and behavior composition separate.
+Factories accept children only. Use `miora/modifiers` for attributes, events, and styles. This keeps element construction and behavior composition separate.
 
 Example:
 
 ```ts
-import { Button, Div, H1, P } from "ustro/html";
-import { Attributes, Events } from "ustro/modifiers";
+import { Button, Div, H1, P } from "miora/html";
+import { Attributes, Events } from "miora/modifiers";
 
 export const card = Div(
   Attributes.class("card"),
   H1("Hello"),
-  P("This is a Ustro component tree."),
+  P("This is a Miora component tree."),
   Button(
     Attributes.type("button"),
     Events.click(() => console.log("clicked")),
@@ -539,8 +539,8 @@ SVG factories also accept children only. Use `Attributes` for SVG attributes and
 Example:
 
 ```ts
-import { Circle, Svg } from "ustro/svg";
-import { Attributes } from "ustro/modifiers";
+import { Circle, Svg } from "miora/svg";
+import { Attributes } from "miora/modifiers";
 
 export const icon = Svg(
   Attributes.attr("viewBox", "0 0 24 24"),
@@ -568,8 +568,8 @@ Main exports:
 Example:
 
 ```ts
-import { Button, Div } from "ustro/html";
-import { Attributes, Events, Style } from "ustro/modifiers";
+import { Button, Div } from "miora/html";
+import { Attributes, Events, Style } from "miora/modifiers";
 
 export const panel = Div(
   Attributes.class("panel"),
@@ -602,9 +602,9 @@ Use `name` to tag DOM nodes, `run` for name-based updates, and `launch` when you
 Example:
 
 ```ts
-import { Button, Div } from "ustro/html";
-import { Attributes, Events } from "ustro/modifiers";
-import { Navigator, Transition } from "ustro/navigator";
+import { Button, Div } from "miora/html";
+import { Attributes, Events } from "miora/modifiers";
+import { Navigator, Transition } from "miora/navigator";
 
 export const card = Div(
   Transition.name("profile-card"),
@@ -640,7 +640,7 @@ Main exports:
 Example:
 
 ```ts
-import { Reactive, Watch } from "ustro/reactive";
+import { Reactive, Watch } from "miora/reactive";
 
 class CounterModel {
   @Reactive()
@@ -668,7 +668,7 @@ Each instance exposes `get`, `set`, `remove`, `clear`, `has`, `keys`, `entries`,
 Example:
 
 ```ts
-import { Storage } from "ustro/storage";
+import { Storage } from "miora/storage";
 
 const prefs = Storage.memory<{ theme: string; sidebar: boolean }>("ui");
 
@@ -693,7 +693,7 @@ Main exports:
 Example:
 
 ```ts
-import { Css, Color, Length } from "ustro/unit";
+import { Css, Color, Length } from "miora/unit";
 
 const gap = Length.rem(1.5);
 const accent = Color.rgb(15, 23, 42);
@@ -717,7 +717,7 @@ Validator schemas include string, number, boolean, date, literal, enum, array, o
 Example:
 
 ```ts
-import { Validator } from "ustro/validator";
+import { Validator } from "miora/validator";
 
 const userSchema = Validator.object({
   email: Validator.string().trim().email(),
@@ -742,9 +742,9 @@ Field blueprints and form controllers let you build typed form state with valida
 Example:
 
 ```ts
-import { BaseComponent, Component } from "ustro/core";
-import { Button, Form, Input, Label } from "ustro/html";
-import { Field, Forms } from "ustro/validator";
+import { BaseComponent, Component } from "miora/core";
+import { Button, Form, Input, Label } from "miora/html";
+import { Field, Forms } from "miora/validator";
 
 @Component({ selector: "user-form" })
 class UserForm extends BaseComponent {
@@ -765,7 +765,7 @@ class UserForm extends BaseComponent {
 
 ## Comparison
 
-Ustro takes ideas from multiple UI ecosystems while keeping a direct DOM-oriented model.
+Miora takes ideas from multiple UI ecosystems while keeping a direct DOM-oriented model.
 
 | Framework | Rendering Model | Templates | Reactivity | DOM Access | Bundle Philosophy |
 |---|---|---|---|---|---|
@@ -775,11 +775,11 @@ Ustro takes ideas from multiple UI ecosystems while keeping a direct DOM-oriente
 | Svelte | Compile-time DOM updates | Templates | Compiler-driven | Generated code | Compile optimized |
 | Solid | Fine-grained DOM updates | JSX | Signals | Direct DOM | Minimal runtime |
 | Lit | Tagged templates | HTML templates | Reactive properties | Native DOM | Lightweight |
-| Ustro | Native DOM factories | TypeScript tree | Fine-grained decorators | Direct DOM | Tree-shakeable |
+| Miora | Native DOM factories | TypeScript tree | Fine-grained decorators | Direct DOM | Tree-shakeable |
 
-### Ustro's approach
+### Miora's approach
 
-Ustro does not try to replace the DOM with another abstraction.
+Miora does not try to replace the DOM with another abstraction.
 
 The component tree you write is the same structure that is created in the browser.
 
@@ -801,7 +801,7 @@ becomes:
 
 ### Philosophy table
 
-| | React | Angular | Vue | Svelte | Lit | Ustro |
+| | React | Angular | Vue | Svelte | Lit | Miora |
 |---|---|---|---|---|---|---|
 | JSX | ✓ | ✗ | Optional | ✗ | ✗ | ✗ |
 | Virtual DOM | ✓ | ✗ | ✓ | ✗ | ✗ | ✗ |

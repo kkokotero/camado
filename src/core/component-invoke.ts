@@ -22,7 +22,7 @@ export function invokeComponent<TComponent extends BaseComponent>(
 
 	if (!doc) {
 		throw new Error(
-			`Ustro requires a DOM to invoke ${selector || component.name}`,
+			`Miora requires a DOM to invoke ${selector || component.name}`,
 		);
 	}
 

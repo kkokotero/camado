@@ -8,42 +8,42 @@ export default {
   resolve: {
     alias: [
       {
-        find: /^ustro\/control$/,
+        find: /^miora\/control$/,
         replacement: resolve(repoRoot, "src/control/index.ts"),
       },
       {
-        find: /^ustro\/core$/,
+        find: /^miora\/core$/,
         replacement: resolve(repoRoot, "src/core/index.ts"),
       },
       {
-        find: /^ustro\/reactive$/,
+        find: /^miora\/reactive$/,
         replacement: resolve(repoRoot, "src/reactive/index.ts"),
       },
       {
-        find: /^ustro\/html$/,
+        find: /^miora\/html$/,
         replacement: resolve(repoRoot, "src/html/index.ts"),
       },
       {
-        find: /^ustro\/modifiers$/,
+        find: /^miora\/modifiers$/,
         replacement: resolve(repoRoot, "src/modifiers/index.ts"),
       },
       {
-        find: /^ustro\/navigator$/,
+        find: /^miora\/navigator$/,
         replacement: resolve(repoRoot, "src/navigator/index.ts"),
       },
       {
-        find: /^ustro\/svg$/,
+        find: /^miora\/svg$/,
         replacement: resolve(repoRoot, "src/svg/index.ts"),
       },
       {
-        find: /^ustro\/unit$/,
+        find: /^miora\/unit$/,
         replacement: resolve(repoRoot, "src/unit/index.ts"),
       },
       {
-        find: /^ustro\/validator$/,
+        find: /^miora\/validator$/,
         replacement: resolve(repoRoot, "src/validator/index.ts"),
       },
-      { find: /^ustro$/, replacement: resolve(repoRoot, "src/index.ts") },
+      { find: /^miora$/, replacement: resolve(repoRoot, "src/index.ts") },
     ],
   },
   server: {

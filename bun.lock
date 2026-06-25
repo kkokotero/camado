@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "ustro",
+      "name": "miora",
       "devDependencies": {
         "@types/node": "latest",
         "bun-types": "latest",

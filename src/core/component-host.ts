@@ -7,10 +7,10 @@ import { getComponentMetadata } from "./metadata.ts";
 import type { BaseComponent } from "./base-component.ts";
 import type { ComponentConstructor } from "./component-types.ts";
 
-const componentInstanceSymbol = Symbol("ustro.componentInstance");
-const componentHostKeysSymbol = Symbol("ustro.componentHostKeys");
-const componentHydratedSymbol = Symbol("ustro.componentHydrated");
-const componentProjectedSymbol = Symbol("ustro.componentProjected");
+const componentInstanceSymbol = Symbol("miora.componentInstance");
+const componentHostKeysSymbol = Symbol("miora.componentHostKeys");
+const componentHydratedSymbol = Symbol("miora.componentHydrated");
+const componentProjectedSymbol = Symbol("miora.componentProjected");
 
 export function isComponentHostElement(
 	value: unknown,
@@ -405,7 +405,7 @@ export function defineComponentHost<TComponent extends BaseComponent>(
 	const hostKeys = collectHostKeys(metadata);
 	const HostElementBase = getHostElementBase();
 
-	class UstroComponentHost extends HostElementBase {
+	class MioraComponentHost extends HostElementBase {
 		declare [componentInstanceSymbol]: TComponent;
 
 		constructor() {
@@ -474,7 +474,7 @@ export function defineComponentHost<TComponent extends BaseComponent>(
 	}
 
 	for (const key of hostKeys) {
-		Object.defineProperty(UstroComponentHost.prototype, key, {
+		Object.defineProperty(MioraComponentHost.prototype, key, {
 			configurable: true,
 			enumerable: true,
 			get(this: ComponentHostInstance<TComponent>) {
@@ -499,7 +499,7 @@ export function defineComponentHost<TComponent extends BaseComponent>(
 			continue;
 		}
 
-		Object.defineProperty(UstroComponentHost.prototype, key, {
+		Object.defineProperty(MioraComponentHost.prototype, key, {
 			configurable: true,
 			writable: true,
 			value(this: ComponentHostInstance<TComponent>, ...args: unknown[]) {
@@ -520,6 +520,6 @@ export function defineComponentHost<TComponent extends BaseComponent>(
 
 	customElementsApi.define(
 		selector,
-		UstroComponentHost as unknown as CustomElementConstructor,
+		MioraComponentHost as unknown as CustomElementConstructor,
 	);
 }
