@@ -1,0 +1,104 @@
+{
+  "name": "neptune",
+  "version": "0.1.0",
+  "description": "A modular TypeScript-first UI/runtime toolkit for declarative components, reactivity, validators, and browser helpers.",
+  "type": "module",
+  "private": false,
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./control": {
+      "types": "./dist/control/index.d.ts",
+      "import": "./dist/control/index.js"
+    },
+    "./core": {
+      "types": "./dist/core/index.d.ts",
+      "import": "./dist/core/index.js"
+    },
+    "./html": {
+      "types": "./dist/html/index.d.ts",
+      "import": "./dist/html/index.js"
+    },
+    "./modifiers": {
+      "types": "./dist/modifiers/index.d.ts",
+      "import": "./dist/modifiers/index.js"
+    },
+    "./navigator": {
+      "types": "./dist/navigator/index.d.ts",
+      "import": "./dist/navigator/index.js"
+    },
+    "./reactive": {
+      "types": "./dist/reactive/index.d.ts",
+      "import": "./dist/reactive/index.js"
+    },
+    "./storage": {
+      "types": "./dist/storage/index.d.ts",
+      "import": "./dist/storage/index.js"
+    },
+    "./svg": {
+      "types": "./dist/svg/index.d.ts",
+      "import": "./dist/svg/index.js"
+    },
+    "./unit": {
+      "types": "./dist/unit/index.d.ts",
+      "import": "./dist/unit/index.js"
+    },
+    "./validator": {
+      "types": "./dist/validator/index.d.ts",
+      "import": "./dist/validator/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git"
+  },
+  "homepage": "https://github.com/kkokotero/neptune",
+  "bugs": {
+    "url": "https://github.com/kkokotero/neptune/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18.17.0"
+  },
+  "scripts": {
+    "prepublishOnly": "bun run build",
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "generate:tags": "bun scripts/generate-tags.ts"
+  },
+  "keywords": [
+    "typescript",
+    "ui",
+    "runtime",
+    "components",
+    "reactivity",
+    "validators",
+    "browser",
+    "esm"
+  ],
+  "author": "kkokotero",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "latest",
+    "bun-types": "latest",
+    "tsup": "^8.5.1",
+    "vitest": "^4.1.9"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}

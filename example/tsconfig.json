@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "jsx": "preserve",
+    "baseUrl": ".",
+    "paths": {
+      "neptune": ["../src/index.ts"],
+      "neptune/control": ["../src/control/index.ts"],
+      "neptune/core": ["../src/core/index.ts"],
+      "neptune/reactive": ["../src/reactive/index.ts"],
+      "neptune/html": ["../src/html/index.ts"],
+      "neptune/modifiers": ["../src/modifiers/index.ts"],
+      "neptune/navigator": ["../src/navigator/index.ts"],
+      "neptune/svg": ["../src/svg/index.ts"],
+      "neptune/unit": ["../src/unit/index.ts"],
+      "neptune/validator": ["../src/validator/index.ts"],
+    },
+    "experimentalDecorators": true,
+  },
+  "include": ["src", "vite.config.ts"],
+}
