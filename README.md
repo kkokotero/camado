@@ -229,10 +229,16 @@ console.log(manifest.selectors["app-root"]);
 
 Create a binder with `BaseBinder`:
 
+`bind(context)` is an optional hook you can override to run setup logic when the binder gets linked to a component host.
+
 ```ts
 import { BaseBinder } from "camado/core";
 
 class CounterBinder extends BaseBinder<{ changed: number }> {
+  protected override bind() {
+    console.log("linked");
+  }
+
   bump(value: number) {
     this.channel.emit("changed", value);
   }

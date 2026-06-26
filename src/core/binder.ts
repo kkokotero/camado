@@ -61,6 +61,7 @@ export abstract class BaseBinder<
 
 		const wasEmpty = this.#contexts.size === 0;
 		this.#contexts.set(context.component, context);
+		this.bind(context);
 		if (wasEmpty) {
 			this.onConnect(context);
 		}
@@ -96,6 +97,8 @@ export abstract class BaseBinder<
 		}
 		this.#invalidateQueued = false;
 	}
+
+	protected bind(_context: BinderContext): void {}
 
 	protected onConnect(_context: BinderContext): void {}
 

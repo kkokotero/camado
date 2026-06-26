@@ -122,6 +122,7 @@ function collectHostKeys(
 		...metadata.reactiveKeys,
 		...metadata.childrenKeys,
 		...metadata.slotKeys.keys(),
+		...metadata.binders.keys(),
 	];
 }
 

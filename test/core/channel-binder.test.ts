@@ -6,6 +6,7 @@ import {
 	Channel,
 	Component,
 } from "../../src/core/index.ts";
+import type { BinderContext } from "../../src/core/binder.ts";
 
 const customElementsRegistry = new Map<string, CustomElementConstructor>();
 Object.defineProperty(globalThis, "customElements", {
@@ -63,10 +64,15 @@ test("Channel emits typed payloads to listeners", async () => {
 	expect(seen).toEqual([["ping", 1]]);
 });
 
+let binds = 0;
 let connects = 0;
 let disconnects = 0;
 
 class CounterBinder extends BaseBinder {
+	protected override bind(_context: BinderContext): void {
+		binds += 1;
+	}
+
 	protected override onConnect(): void {
 		connects += 1;
 	}
@@ -98,6 +104,7 @@ test("Bind connects and disconnects binders with the component lifecycle", async
 		await Promise.resolve();
 
 		expect(component.bind).toBe(CounterBinder.instance);
+		expect(binds).toBe(1);
 		expect(connects).toBe(1);
 		expect(disconnects).toBe(0);
 
