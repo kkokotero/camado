@@ -7,6 +7,7 @@ import {
 	Component,
 } from "../../src/core/index.ts";
 import type { BinderContext } from "../../src/core/binder.ts";
+import { Reactive } from "../../src/reactive/index.ts";
 
 const customElementsRegistry = new Map<string, CustomElementConstructor>();
 Object.defineProperty(globalThis, "customElements", {
@@ -67,6 +68,7 @@ test("Channel emits typed payloads to listeners", async () => {
 let binds = 0;
 let connects = 0;
 let disconnects = 0;
+let invalidations = 0;
 
 class CounterBinder extends BaseBinder {
 	protected override bind(_context: BinderContext): void {
@@ -79,6 +81,16 @@ class CounterBinder extends BaseBinder {
 
 	protected override onDisconnect(): void {
 		disconnects += 1;
+	}
+}
+
+class ReactiveCounterBinder extends BaseBinder {
+	@Reactive()
+	count = 0;
+
+	protected override invalidate(): void {
+		invalidations += 1;
+		super.invalidate();
 	}
 }
 
@@ -110,6 +122,35 @@ test("Bind connects and disconnects binders with the component lifecycle", async
 
 		component.disconnectedCallback();
 		expect(disconnects).toBe(1);
+	} finally {
+		(globalThis as typeof globalThis & { document: Document }).document =
+			previousDocument as Document;
+	}
+});
+
+@Component({ selector: "camado-test-reactive-bound" })
+class TestReactiveBoundComponent extends BaseComponent {
+	@Bind(ReactiveCounterBinder)
+	binder!: ReactiveCounterBinder;
+
+	protected override render() {
+		return null;
+	}
+}
+
+test("Reactive fields inside binders invalidate on change", async () => {
+	const previousDocument = globalThis.document;
+	(globalThis as typeof globalThis & { document: Document }).document =
+		createTestDocument();
+
+	try {
+		const component = TestReactiveBoundComponent.create();
+		component.connectedCallback();
+		await Promise.resolve();
+		await Promise.resolve();
+
+		component.binder.count += 1;
+		expect(invalidations).toBe(1);
 	} finally {
 		(globalThis as typeof globalThis & { document: Document }).document =
 			previousDocument as Document;

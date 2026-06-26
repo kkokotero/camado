@@ -1,5 +1,6 @@
 import type { BaseComponent } from "./base-component.ts";
 import { scheduleConcurrentBackgroundJob } from "./background.ts";
+import { installTrackedFields } from "./metadata.ts";
 import { Channel } from "./channel.ts";
 
 export interface BinderContext {
@@ -49,6 +50,7 @@ export abstract class BaseBinder<
 	readonly channel = new Channel<TEvents>();
 	#contexts = new Map<BaseComponent, BinderContext>();
 	#invalidateQueued = false;
+	#prepared = false;
 
 	static get instance(): BaseBinder<any> {
 		return getBinderInstance(BaseBinder as unknown as BinderConstructor<any>);
@@ -58,6 +60,8 @@ export abstract class BaseBinder<
 		if (this.#contexts.has(context.component)) {
 			return;
 		}
+
+		this.#prepare();
 
 		const wasEmpty = this.#contexts.size === 0;
 		this.#contexts.set(context.component, context);
@@ -96,6 +100,18 @@ export abstract class BaseBinder<
 			});
 		}
 		this.#invalidateQueued = false;
+	}
+
+	#prepare(): void {
+		if (this.#prepared) {
+			return;
+		}
+
+		installTrackedFields(this as Record<string | symbol, unknown>, () =>
+			this.invalidate(),
+		);
+
+		this.#prepared = true;
 	}
 
 	protected bind(_context: BinderContext): void {}
