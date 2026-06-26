@@ -17,6 +17,7 @@ import type {
 	ComponentFactory,
 	ComponentInvocationOptions,
 } from "./component-types.ts";
+import { getComponentOutputCallbacks } from "./output-callbacks.ts";
 import { invokeComponent } from "./component-invoke.ts";
 
 export type RenderValue =
@@ -204,10 +205,9 @@ export abstract class BaseComponent {
 				: ({ type: name, detail, ...init } as unknown as Event);
 
 		const result = dispatcher.dispatchEvent(event);
-		const host = this.#host as unknown as Record<string, unknown>;
-		const directHandler = Object.hasOwn(host, name) ? host[name] : undefined;
+		const directHandler = getComponentOutputCallbacks(this.#host)?.[name];
 		if (typeof directHandler === "function") {
-			(directHandler as (payload: TDetail) => unknown)(detail as TDetail);
+			directHandler(detail as TDetail);
 		}
 
 		return result;

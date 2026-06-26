@@ -102,9 +102,9 @@ class TestEventInput extends BaseComponent {
 		return null;
 	}
 
-	@Output("formSubmitted")
+	@Output()
 	emitSaved() {
-		return { ok: true };
+		return { ok: true } as const;
 	}
 }
 
@@ -222,8 +222,10 @@ test("@Input passes only the emitted payload to input callbacks", () => {
 		createTestDocument();
 
 	try {
+		let called = false;
 		const eventHost = TestEventInput.create({
-			formSubmitted: (detail: { ok: true }) => {
+			emitSaved: (detail: { ok: true }) => {
+				called = true;
 				expect(detail).toEqual({ ok: true });
 			},
 		});
@@ -231,6 +233,7 @@ test("@Input passes only the emitted payload to input callbacks", () => {
 		const result = eventHost.emitSaved();
 
 		expect(result).toEqual({ ok: true });
+		expect(called).toBe(true);
 	} finally {
 		(globalThis as typeof globalThis & { document: Document }).document =
 			previousDocument as Document;

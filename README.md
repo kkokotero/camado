@@ -146,7 +146,7 @@ mount(document.body, App.component());
 
 #### `create` and `component`
 
-`MyComponent.create({...})` creates the element immediately and applies the passed props during creation. `MyComponent.component()` returns a callable factory, so you can store it and invoke it with props later.
+`MyComponent.create({...})` creates the element immediately and applies the passed props during creation. `MyComponent.component()` returns a callable factory, so you can store it and invoke it with props later. Output callbacks use the public method name as the key.
 
 Example:
 
@@ -298,7 +298,7 @@ class ProfileCard extends BaseComponent {
 
 #### `@Output`
 
-`@Output("name")` wraps a method and emits its return value as an event when you call it. It also supports input-style fields when used on properties.
+`@Output()` wraps a public method and emits its return value as an event when you call it. The callback key matches the method name, so a `save()` output is passed as `save: (detail) => ...`.
 
 Example:
 
@@ -307,9 +307,9 @@ import { BaseComponent, Component, Output } from "camado/core";
 
 @Component({ selector: "profile-card" })
 class ProfileCard extends BaseComponent {
-  @Output("saved")
+  @Output()
   save() {
-    return { ok: true };
+    return { ok: true } as const;
   }
 
   protected override render() {

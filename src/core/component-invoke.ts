@@ -5,6 +5,7 @@ import {
 } from "./factories.ts";
 import { getComponentMetadata } from "./metadata.ts";
 import type { BaseComponent } from "./base-component.ts";
+import { setComponentOutputCallbacks } from "./output-callbacks.ts";
 import type {
 	ComponentChildren,
 	ComponentConstructor,
@@ -31,8 +32,18 @@ export function invokeComponent<TComponent extends BaseComponent>(
 	) as ComponentElement<TComponent>;
 
 	const { children, ...directProps } = options;
+	const outputCallbacks: Record<string, (detail: unknown) => unknown> = {};
 
-	Object.assign(element as object, directProps);
+	for (const [key, value] of Object.entries(directProps)) {
+		if (metadata?.events.has(key) && typeof value === "function") {
+			outputCallbacks[key] = value as (detail: unknown) => unknown;
+			continue;
+		}
+
+		(element as unknown as Record<string, unknown>)[key] = value;
+	}
+
+	setComponentOutputCallbacks(element, outputCallbacks);
 
 	const childValues = toChildArray(children);
 	if (childValues.length > 0) {
