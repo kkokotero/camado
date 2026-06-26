@@ -183,6 +183,41 @@ const Card = AppCard.component();
 const viaFactory = Card({ title: "Invoked with props" });
 ```
 
+#### Using components as custom elements
+
+Once the module defining the component is loaded, the `selector` becomes a custom HTML element tag. You can use it directly in plain HTML, pass `@Property()` fields as attributes, and project children or named slots through the light DOM.
+
+Example:
+
+```html
+<app-card title="Hello world">
+  <p>Body content</p>
+  <button slot="footer">Save</button>
+</app-card>
+```
+
+And in the component:
+
+```ts
+import { BaseComponent, Children, Component, Property, Slot } from "camado/core";
+
+@Component({ selector: "app-card" })
+class AppCard extends BaseComponent {
+  @Property()
+  title = "Untitled";
+
+  @Children()
+  content?: unknown;
+
+  @Slot("footer")
+  footer?: unknown;
+
+  protected override render() {
+    return null;
+  }
+}
+```
+
 #### `mount`
 
 `mount(target, component)` appends a component factory or constructor to a DOM target.
