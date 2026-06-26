@@ -149,9 +149,7 @@ test("style builder emits a reusable class", () => {
 	}
 });
 
-
 test("inline style helper stays inline", () => {
-
 	const previousDocument = globalThis.document;
 	const element = {
 		style: {
@@ -188,9 +186,7 @@ test("inline style helper stays inline", () => {
 	}
 });
 
-
 test("attribute and event helpers chain", () => {
-
 	const attributes = Attribute.class("primary")
 		.id("example")
 		.aria("label", "Save")
@@ -208,7 +204,6 @@ test("attribute and event helpers chain", () => {
 	expect(click.kind).toBe("event");
 	expect(Object.keys(click.listeners)).toEqual(["click", "input"]);
 });
-
 
 test("attribute helper merges class names at runtime", () => {
 	const previousDocument = globalThis.document;
@@ -256,7 +251,6 @@ test("attribute helper merges class names at runtime", () => {
 		});
 	}
 });
-
 
 test("attribute helper covers common svg attributes", () => {
 	const attributes = Attribute.viewBox("0 0 24 24")

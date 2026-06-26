@@ -93,9 +93,8 @@ class AttributeBuilder extends FacadeBase implements AttributeFacade {
 			return this;
 		}
 
-		const current = typeof this.#attributes.class === "string"
-			? this.#attributes.class
-			: "";
+		const current =
+			typeof this.#attributes.class === "string" ? this.#attributes.class : "";
 		return this.attr("class", mergeClassNames(current, ...values));
 	}
 

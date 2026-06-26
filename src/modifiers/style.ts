@@ -1,4 +1,8 @@
-import { createStyleBuilder, ensureStyleRuntime, type StyleBuilder } from "./style-builder.ts";
+import {
+	createStyleBuilder,
+	ensureStyleRuntime,
+	type StyleBuilder,
+} from "./style-builder.ts";
 import { FacadeBase } from "./shared.ts";
 
 type CSSStylePropertyName = {
