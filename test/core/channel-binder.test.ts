@@ -66,6 +66,7 @@ test("Channel emits typed payloads to listeners", async () => {
 });
 
 let binds = 0;
+let unbinds = 0;
 let connects = 0;
 let disconnects = 0;
 let invalidations = 0;
@@ -73,6 +74,10 @@ let invalidations = 0;
 class CounterBinder extends BaseBinder {
 	protected override bind(_context: BinderContext): void {
 		binds += 1;
+	}
+
+	protected override unbind(_context: BinderContext): void {
+		unbinds += 1;
 	}
 
 	protected override onConnect(): void {
@@ -121,6 +126,7 @@ test("Bind connects and disconnects binders with the component lifecycle", async
 		expect(disconnects).toBe(0);
 
 		component.disconnectedCallback();
+		expect(unbinds).toBe(1);
 		expect(disconnects).toBe(1);
 	} finally {
 		(globalThis as typeof globalThis & { document: Document }).document =

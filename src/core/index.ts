@@ -1,4 +1,5 @@
 export { BaseBinder } from "./binder.ts";
+export type { BinderContext } from "./binder.ts";
 export { Bind } from "./bind.ts";
 export { Channel } from "./channel.ts";
 export { BaseComponent } from "./base-component.ts";

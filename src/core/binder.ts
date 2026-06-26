@@ -78,6 +78,7 @@ export abstract class BaseBinder<
 
 		const wasLast = this.#contexts.size === 1;
 		this.#contexts.delete(context.component);
+		this.unbind(context);
 		if (wasLast) {
 			this.onDisconnect(context);
 		}
@@ -115,6 +116,8 @@ export abstract class BaseBinder<
 	}
 
 	protected bind(_context: BinderContext): void {}
+
+	protected unbind(_context: BinderContext): void {}
 
 	protected onConnect(_context: BinderContext): void {}
 
