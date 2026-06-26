@@ -2,6 +2,7 @@ import type { PrimitiveChild } from "./dom.ts";
 import type { NodeRef } from "./node.ts";
 import { tryHandleChildValue } from "./child-handlers.ts";
 import type { ControlToken } from "../control/index.ts";
+import type { StyleToken } from "../modifiers/style.ts";
 import type { StyleBuilder } from "../modifiers/style-builder.ts";
 import type { FormFieldState } from "../validator/index.ts";
 
@@ -64,6 +65,7 @@ export type ChildValue =
 	| PrimitiveChild
 	| Node
 	| NodeRef
+	| StyleToken
 	| StyleBuilder
 	| ModifierToken
 	| EventToken

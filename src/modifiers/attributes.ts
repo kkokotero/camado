@@ -3,6 +3,14 @@ import { FacadeBase, toKebabCase } from "./shared.ts";
 
 type AttributeValue = string | number | bigint | boolean | null | undefined;
 
+function splitClassNames(value: string): string[] {
+	return value.split(/\s+/).filter(Boolean);
+}
+
+function mergeClassNames(...values: string[]): string {
+	return [...new Set(values.flatMap(splitClassNames))].join(" ");
+}
+
 export interface AttributeFacade {
 	readonly kind: "modifier";
 	readonly attributes: Readonly<
@@ -10,7 +18,26 @@ export interface AttributeFacade {
 	>;
 	attr(name: string, value: AttributeValue): this;
 	attribute(name: string, value: AttributeValue): this;
-	class(value: string): this;
+	class(...values: string[]): this;
+	viewBox(value: string): this;
+	fill(value: string): this;
+	stroke(value: string): this;
+	strokeWidth(value: string | number): this;
+	cx(value: string | number): this;
+	cy(value: string | number): this;
+	r(value: string | number): this;
+	x(value: string | number): this;
+	y(value: string | number): this;
+	d(value: string): this;
+	points(value: string): this;
+	rx(value: string | number): this;
+	ry(value: string | number): this;
+	x1(value: string | number): this;
+	x2(value: string | number): this;
+	y1(value: string | number): this;
+	y2(value: string | number): this;
+	transform(value: string): this;
+	preserveAspectRatio(value: string): this;
 	id(value: string): this;
 	role(value: string): this;
 	title(value: string): this;
@@ -61,8 +88,91 @@ class AttributeBuilder extends FacadeBase implements AttributeFacade {
 		return this.attr(name, value);
 	}
 
-	class(value: string): this {
-		return this.attr("class", value);
+	class(...values: string[]): this {
+		if (values.length === 0) {
+			return this;
+		}
+
+		const current = typeof this.#attributes.class === "string"
+			? this.#attributes.class
+			: "";
+		return this.attr("class", mergeClassNames(current, ...values));
+	}
+
+	viewBox(value: string): this {
+		return this.attr("viewBox", value);
+	}
+
+	fill(value: string): this {
+		return this.attr("fill", value);
+	}
+
+	stroke(value: string): this {
+		return this.attr("stroke", value);
+	}
+
+	strokeWidth(value: string | number): this {
+		return this.attr("stroke-width", value);
+	}
+
+	cx(value: string | number): this {
+		return this.attr("cx", value);
+	}
+
+	cy(value: string | number): this {
+		return this.attr("cy", value);
+	}
+
+	r(value: string | number): this {
+		return this.attr("r", value);
+	}
+
+	x(value: string | number): this {
+		return this.attr("x", value);
+	}
+
+	y(value: string | number): this {
+		return this.attr("y", value);
+	}
+
+	d(value: string): this {
+		return this.attr("d", value);
+	}
+
+	points(value: string): this {
+		return this.attr("points", value);
+	}
+
+	rx(value: string | number): this {
+		return this.attr("rx", value);
+	}
+
+	ry(value: string | number): this {
+		return this.attr("ry", value);
+	}
+
+	x1(value: string | number): this {
+		return this.attr("x1", value);
+	}
+
+	x2(value: string | number): this {
+		return this.attr("x2", value);
+	}
+
+	y1(value: string | number): this {
+		return this.attr("y1", value);
+	}
+
+	y2(value: string | number): this {
+		return this.attr("y2", value);
+	}
+
+	transform(value: string): this {
+		return this.attr("transform", value);
+	}
+
+	preserveAspectRatio(value: string): this {
+		return this.attr("preserveAspectRatio", value);
 	}
 
 	id(value: string): this {

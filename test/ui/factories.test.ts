@@ -98,9 +98,16 @@ test("style builder emits a reusable class", () => {
 	class TestNode {}
 
 	try {
-		(globalThis as typeof globalThis & { Node: typeof TestNode }).Node =
-			TestNode as never;
-		(globalThis as typeof globalThis & { document: Document }).document = doc;
+		Object.defineProperty(globalThis, "Node", {
+			configurable: true,
+			value: TestNode,
+			writable: true,
+		});
+		Object.defineProperty(globalThis, "document", {
+			configurable: true,
+			value: doc,
+			writable: true,
+		});
 		(button as unknown as { ownerDocument: Document }).ownerDocument = doc;
 		(stylesheet as unknown as { ownerDocument: Document }).ownerDocument = doc;
 
@@ -129,14 +136,22 @@ test("style builder emits a reusable class", () => {
 		expect(createdTextNodes.join("")).toContain("@media (max-width: 640px)");
 		expect(element).toBe(button);
 	} finally {
-		(globalThis as typeof globalThis & { document: Document }).document =
-			previousDocument as Document;
-		(globalThis as typeof globalThis & { Node: typeof Node }).Node =
-			previousNode as typeof Node;
+		Object.defineProperty(globalThis, "document", {
+			configurable: true,
+			value: previousDocument,
+			writable: true,
+		});
+		Object.defineProperty(globalThis, "Node", {
+			configurable: true,
+			value: previousNode,
+			writable: true,
+		});
 	}
 });
 
+
 test("inline style helper stays inline", () => {
+
 	const previousDocument = globalThis.document;
 	const element = {
 		style: {
@@ -149,9 +164,13 @@ test("inline style helper stays inline", () => {
 	} as unknown as HTMLElement;
 
 	try {
-		(globalThis as typeof globalThis & { document: Document }).document = {
-			createElement: () => element,
-		} as unknown as Document;
+		Object.defineProperty(globalThis, "document", {
+			configurable: true,
+			value: {
+				createElement: () => element,
+			} as unknown as Document,
+			writable: true,
+		});
 
 		const button = Button(
 			InlineStyle.padding(Css.Unit.px(8)),
@@ -161,12 +180,17 @@ test("inline style helper stays inline", () => {
 			(button.style as unknown as { values: Record<string, string> }).values,
 		).toEqual({ padding: "8px" });
 	} finally {
-		(globalThis as typeof globalThis & { document: Document }).document =
-			previousDocument as Document;
+		Object.defineProperty(globalThis, "document", {
+			configurable: true,
+			value: previousDocument,
+			writable: true,
+		});
 	}
 });
 
+
 test("attribute and event helpers chain", () => {
+
 	const attributes = Attribute.class("primary")
 		.id("example")
 		.aria("label", "Save")
@@ -185,6 +209,75 @@ test("attribute and event helpers chain", () => {
 	expect(Object.keys(click.listeners)).toEqual(["click", "input"]);
 });
 
+
+test("attribute helper merges class names at runtime", () => {
+	const previousDocument = globalThis.document;
+	const button = {
+		classList: {
+			values: [] as string[],
+			add(...classes: string[]) {
+				this.values.push(...classes);
+			},
+		},
+		style: {
+			setProperty() {},
+		},
+		getAttribute() {
+			return null;
+		},
+		setAttribute() {},
+		removeAttribute() {},
+		append() {},
+	} as unknown as HTMLButtonElement;
+
+	try {
+		Object.defineProperty(globalThis, "document", {
+			configurable: true,
+			value: {
+				createElement: () => button,
+			} as unknown as Document,
+			writable: true,
+		});
+
+		const element = Button(
+			Attribute.class("primary"),
+			Attribute.class("secondary"),
+		) as HTMLButtonElement;
+
+		expect(
+			(button.classList as unknown as { values: string[] }).values,
+		).toEqual(["primary", "secondary"]);
+		expect(element).toBe(button);
+	} finally {
+		Object.defineProperty(globalThis, "document", {
+			configurable: true,
+			value: previousDocument,
+			writable: true,
+		});
+	}
+});
+
+
+test("attribute helper covers common svg attributes", () => {
+	const attributes = Attribute.viewBox("0 0 24 24")
+		.fill("none")
+		.stroke("currentColor")
+		.strokeWidth(2)
+		.cx(12)
+		.cy(12)
+		.r(10);
+
+	expect(attributes.attributes).toEqual({
+		viewBox: "0 0 24 24",
+		fill: "none",
+		stroke: "currentColor",
+		"stroke-width": 2,
+		cx: 12,
+		cy: 12,
+		r: 10,
+	});
+});
+
 test("ref helper captures the created element", () => {
 	const ref = Ref<HTMLButtonElement>();
 	const previousDocument = globalThis.document;
@@ -194,19 +287,32 @@ test("ref helper captures the created element", () => {
 	const element = new TestNode() as unknown as HTMLButtonElement;
 
 	try {
-		(globalThis as typeof globalThis & { Node: typeof TestNode }).Node =
-			TestNode as never;
-		(globalThis as typeof globalThis & { document: Document }).document = {
-			createElement: () => element,
-		} as unknown as Document;
+		Object.defineProperty(globalThis, "Node", {
+			configurable: true,
+			value: TestNode,
+			writable: true,
+		});
+		Object.defineProperty(globalThis, "document", {
+			configurable: true,
+			value: {
+				createElement: () => element,
+			} as unknown as Document,
+			writable: true,
+		});
 
 		const button = Button(ref) as HTMLButtonElement;
 
 		expect(ref.current).toBe(button);
 	} finally {
-		(globalThis as typeof globalThis & { document: Document }).document =
-			previousDocument as Document;
-		(globalThis as typeof globalThis & { Node: typeof Node }).Node =
-			previousNode as typeof Node;
+		Object.defineProperty(globalThis, "document", {
+			configurable: true,
+			value: previousDocument,
+			writable: true,
+		});
+		Object.defineProperty(globalThis, "Node", {
+			configurable: true,
+			value: previousNode,
+			writable: true,
+		});
 	}
 });

@@ -1,8 +1,4 @@
-import {
-	createStyleBuilder,
-	ensureStyleRuntime,
-	type StyleBuilder,
-} from "./style-builder.ts";
+import { createStyleBuilder, ensureStyleRuntime, type StyleBuilder } from "./style-builder.ts";
 import { FacadeBase } from "./shared.ts";
 
 type CSSStylePropertyName = {
@@ -14,21 +10,24 @@ type CSSStylePropertyName = {
 
 type StyleValue = string | number | { toString(): string };
 
+export type StyleToken = StyleFacade &
+	Pick<StyleBuilder, "mode" | "toRecord" | "toSnapshot">;
+
 type StylePropertyMethods = {
-	[K in CSSStylePropertyName]: (value: StyleValue) => StyleBuilder;
+	[K in CSSStylePropertyName]: (value: StyleValue) => StyleToken;
 };
 
 export interface StyleFacade extends StylePropertyMethods {
-	radius(value: StyleValue): StyleBuilder;
-	set(name: string, value: StyleValue): StyleBuilder;
-	pseudo(selector: string, apply: (style: StyleBuilder) => void): StyleBuilder;
-	hover(apply: (style: StyleBuilder) => void): StyleBuilder;
-	focus(apply: (style: StyleBuilder) => void): StyleBuilder;
-	active(apply: (style: StyleBuilder) => void): StyleBuilder;
-	before(apply: (style: StyleBuilder) => void): StyleBuilder;
-	after(apply: (style: StyleBuilder) => void): StyleBuilder;
-	media(query: string, apply: (style: StyleBuilder) => void): StyleBuilder;
-	supports(query: string, apply: (style: StyleBuilder) => void): StyleBuilder;
+	radius(value: StyleValue): StyleToken;
+	set(name: string, value: StyleValue): StyleToken;
+	pseudo(selector: string, apply: (style: StyleToken) => void): StyleToken;
+	hover(apply: (style: StyleToken) => void): StyleToken;
+	focus(apply: (style: StyleToken) => void): StyleToken;
+	active(apply: (style: StyleToken) => void): StyleToken;
+	before(apply: (style: StyleToken) => void): StyleToken;
+	after(apply: (style: StyleToken) => void): StyleToken;
+	media(query: string, apply: (style: StyleToken) => void): StyleToken;
+	supports(query: string, apply: (style: StyleToken) => void): StyleToken;
 }
 
 export type InlineStyleFacade = StyleFacade;
@@ -52,17 +51,20 @@ function createStyleFacade<T extends abstract new (...args: any[]) => object>(
 				const method = Reflect.get(builder, property, builder);
 
 				if (typeof method === "function") {
-					return (method as (...methodArgs: unknown[]) => StyleBuilder).apply(
+					return (method as (...methodArgs: unknown[]) => StyleToken).apply(
 						builder,
 						args,
-					);
+					) as StyleToken;
 				}
 
 				if (args.length === 1) {
-					return builder.set(property, args[0] as StyleValue);
+					return builder.set(
+						property,
+						args[0] as StyleValue,
+					) as unknown as StyleToken;
 				}
 
-				return builder;
+				return builder as unknown as StyleToken;
 			};
 		},
 	}) as unknown as StyleFacade;
