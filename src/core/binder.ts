@@ -1,11 +1,13 @@
 import type { BaseComponent } from "./base-component.ts";
 import { scheduleConcurrentBackgroundJob } from "./background.ts";
-import { installTrackedFields } from "./metadata.ts";
+import { dispatchWatchers, installTrackedFields } from "./metadata.ts";
+import type { ComponentFieldKey } from "./metadata.ts";
 import { Channel } from "./channel.ts";
 
 export interface BinderContext {
 	component: BaseComponent;
 	host: HTMLElement;
+	key: ComponentFieldKey;
 }
 
 export type BinderConstructor<
@@ -84,7 +86,11 @@ export abstract class BaseBinder<
 		}
 	}
 
-	protected invalidate(): void {
+	protected invalidate(
+		sourceKey?: ComponentFieldKey,
+		next?: unknown,
+		previous?: unknown,
+	): void {
 		if (this.#invalidateQueued) {
 			return;
 		}
@@ -92,6 +98,17 @@ export abstract class BaseBinder<
 		const contexts = [...this.#contexts.values()];
 		if (contexts.length === 0) {
 			return;
+		}
+
+		if (sourceKey !== undefined) {
+			for (const context of contexts) {
+				dispatchWatchers(
+					context.component as unknown as Record<string | symbol, unknown>,
+					`${String(context.key)}.${String(sourceKey)}`,
+					next,
+					previous,
+				);
+			}
 		}
 
 		this.#invalidateQueued = true;
@@ -108,8 +125,9 @@ export abstract class BaseBinder<
 			return;
 		}
 
-		installTrackedFields(this as Record<string | symbol, unknown>, () =>
-			this.invalidate(),
+		installTrackedFields(
+			this as Record<string | symbol, unknown>,
+			(key, next, previous) => this.invalidate(key, next, previous),
 		);
 
 		this.#prepared = true;

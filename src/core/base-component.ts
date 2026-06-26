@@ -268,7 +268,7 @@ export abstract class BaseComponent {
 		for (const [key, BinderCtor] of metadata.binders) {
 			const binder = getBinderInstance(BinderCtor);
 			(this as Record<string | symbol, unknown>)[key] = binder;
-			const context: BinderContext = { component: this, host };
+			const context: BinderContext = { component: this, host, key };
 			if (!attached.has(binder)) {
 				attached.add(binder);
 				binder.connect(context);

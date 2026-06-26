@@ -722,11 +722,15 @@ Example:
 ```ts
 import { Reactive, Watch } from "camado/reactive";
 
-class CounterModel {
+class CounterBinder {
   @Reactive()
   count = 0;
+}
 
-  @Watch.of((self) => self.count)
+class CounterModel {
+  binder = new CounterBinder();
+
+  @Watch.of((self) => self.binder.count)
   onCountChange() {
     console.log("count changed");
   }

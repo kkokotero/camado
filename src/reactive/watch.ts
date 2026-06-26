@@ -21,7 +21,7 @@ function resolveWatchSourceKey(selector: WatchSelector): string {
 		// ignore accessor errors; only the accessed path matters
 	}
 
-	return path[path.length - 1] ?? "";
+	return path.join(".");
 }
 
 export function Watch(sourceKey: string): MethodDecorator;
