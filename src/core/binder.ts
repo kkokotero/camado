@@ -1,6 +1,10 @@
 import type { BaseComponent } from "./base-component.ts";
 import { scheduleConcurrentBackgroundJob } from "./background.ts";
-import { dispatchWatchers, installTrackedFields } from "./metadata.ts";
+import {
+	dispatchWatchers,
+	getComponentMetadata,
+	installTrackedFields,
+} from "./metadata.ts";
 import type { ComponentFieldKey } from "./metadata.ts";
 import { Channel } from "./channel.ts";
 
@@ -67,6 +71,7 @@ export abstract class BaseBinder<
 
 		const wasEmpty = this.#contexts.size === 0;
 		this.#contexts.set(context.component, context);
+		this.#syncHostFields(context.component);
 		this.bind(context);
 		if (wasEmpty) {
 			this.onConnect(context);
@@ -83,6 +88,20 @@ export abstract class BaseBinder<
 		this.unbind(context);
 		if (wasLast) {
 			this.onDisconnect(context);
+		}
+		this.#syncHostFields(this.#contexts.values().next().value?.component);
+	}
+
+	#syncHostFields(component?: BaseComponent): void {
+		const hostKeys = getComponentMetadata(
+			this.constructor as Function,
+		)?.hostKeys;
+		if (!hostKeys || hostKeys.size === 0) {
+			return;
+		}
+
+		for (const key of hostKeys) {
+			(this as Record<string | symbol, unknown>)[key] = component;
 		}
 	}
 

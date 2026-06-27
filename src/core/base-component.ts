@@ -11,6 +11,7 @@ import {
 } from "./binder.ts";
 import { patchRender } from "./patch.ts";
 import { setCurrentRenderTarget } from "./render-context.ts";
+import type { SelfToken } from "./self.ts";
 import type {
 	ComponentConstructor,
 	ComponentElement,
@@ -28,6 +29,7 @@ export type RenderValue =
 	| boolean
 	| null
 	| undefined
+	| SelfToken
 	| RenderValue[];
 
 function createComponentElement<TComponent extends BaseComponent>(

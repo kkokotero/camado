@@ -5,6 +5,7 @@ import {
 	BaseComponent,
 	Channel,
 	Component,
+	Host,
 } from "../../src/core/index.ts";
 import type { BinderContext } from "../../src/core/binder.ts";
 import { Reactive, Watch } from "../../src/reactive/index.ts";
@@ -71,6 +72,7 @@ let connects = 0;
 let disconnects = 0;
 let invalidations = 0;
 let watchHits = 0;
+let hostSeen: unknown;
 
 class CounterBinder extends BaseBinder {
 	protected override bind(_context: BinderContext): void {
@@ -101,6 +103,15 @@ class ReactiveCounterBinder extends BaseBinder {
 	): void {
 		invalidations += 1;
 		super.invalidate(sourceKey, next, previous);
+	}
+}
+
+class HostAwareBinder extends BaseBinder {
+	@Host()
+	host!: TestHostBoundComponent;
+
+	protected override bind(): void {
+		hostSeen = this.host;
 	}
 }
 
@@ -153,6 +164,39 @@ class TestReactiveBoundComponent extends BaseComponent {
 		return null;
 	}
 }
+
+@Component({ selector: "camado-test-host-bound" })
+class TestHostBoundComponent extends BaseComponent {
+	@Bind(HostAwareBinder)
+	binder!: HostAwareBinder;
+
+	protected override render() {
+		return null;
+	}
+}
+
+test("Host injects the current component instance into binders", async () => {
+	const previousDocument = globalThis.document;
+	(globalThis as typeof globalThis & { document: Document }).document =
+		createTestDocument();
+
+	try {
+		const component = TestHostBoundComponent.create();
+		component.connectedCallback();
+		await Promise.resolve();
+		await Promise.resolve();
+
+		expect(component.binder.host).not.toBe(component);
+		expect(component.binder.host instanceof BaseComponent).toBe(true);
+		expect(typeof (component.binder.host as any).connectedCallback).toBe(
+			"undefined",
+		);
+		expect(hostSeen).toBe(component.binder.host);
+	} finally {
+		(globalThis as typeof globalThis & { document: Document }).document =
+			previousDocument as Document;
+	}
+});
 
 test("Reactive fields inside binders invalidate on change", async () => {
 	const previousDocument = globalThis.document;

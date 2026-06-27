@@ -14,6 +14,7 @@ import {
 	isComponentHostProjected,
 } from "./component-host.ts";
 import type { RenderValue } from "./base-component.ts";
+import { isSelfToken, type SelfToken } from "./self.ts";
 import {
 	clearObserverRuntime,
 	syncObserverRuntime,
@@ -27,13 +28,43 @@ export function patchRender(
 		return;
 	}
 
+	const flattened = flattenRenderValue(next);
+	const selfIndex = flattened.findIndex(isSelfToken);
+	if (selfIndex > 0) {
+		throw new Error("Camado Self(...) must be the first render value.");
+	}
+
+	if (selfIndex === 0 && flattened.slice(1).some(isSelfToken)) {
+		throw new Error(
+			"Camado Self(...) can only appear once and must be the first render value.",
+		);
+	}
+
+	const selfToken = selfIndex === 0 ? (flattened[0] as SelfToken) : undefined;
+	const selfNodes = selfToken ? collectSelfNodes(selfToken.children) : [];
+	if (selfToken) {
+		for (const child of selfToken.children) {
+			appendChildValue(target, child);
+		}
+	}
+
+	const nextNodes = selfToken
+		? [
+				...selfNodes,
+				...flattened
+					.slice(1)
+					.filter((value): value is Node | string => !isSelfToken(value)),
+			]
+		: flattened.filter((value): value is Node | string => !isSelfToken(value));
+
 	const childNodes = target.childNodes;
 	if (!childNodes || childNodes.length === 0) {
-		appendChildValue(target, next);
+		for (const child of nextNodes) {
+			appendChildValue(target, child);
+		}
 		return;
 	}
 
-	const nextNodes = flattenRenderValue(next);
 	const currentNodes = Array.from(childNodes);
 
 	if (shouldForceFullReplace(target)) {
@@ -473,15 +504,70 @@ function removeNode(node: Node): void {
 	parent?.removeChild?.(node);
 }
 
-function flattenRenderValue(value: RenderValue): Array<Node | string> {
-	const result: Array<Node | string> = [];
+function flattenRenderValue(
+	value: RenderValue,
+): Array<Node | string | SelfToken> {
+	const result: Array<Node | string | SelfToken> = [];
 	collectRenderValues(value, result);
 	return result;
 }
 
+function collectSelfNodes(children: readonly unknown[]): Array<Node | string> {
+	const result: Array<Node | string> = [];
+	for (const child of children) {
+		collectSelfChild(child, result);
+	}
+	return result;
+}
+
+function collectSelfChild(value: unknown, result: Array<Node | string>): void {
+	if (Array.isArray(value)) {
+		for (const item of value) {
+			collectSelfChild(item, result);
+		}
+		return;
+	}
+
+	if (value === null || value === undefined) {
+		return;
+	}
+
+	if (
+		typeof value === "string" ||
+		typeof value === "number" ||
+		typeof value === "bigint" ||
+		typeof value === "boolean"
+	) {
+		result.push(String(value));
+		return;
+	}
+
+	if (
+		typeof Node !== "undefined" &&
+		value &&
+		typeof value === "object" &&
+		value instanceof Node &&
+		isFragmentNode(value)
+	) {
+		for (let index = 0; index < value.childNodes.length; index += 1) {
+			collectSelfChild(value.childNodes[index], result);
+		}
+		return;
+	}
+
+	if (
+		typeof Node !== "undefined" &&
+		value &&
+		typeof value === "object" &&
+		value instanceof Node
+	) {
+		result.push(value);
+	}
+}
+
 function collectRenderValues(
 	value: RenderValue,
-	result: Array<Node | string>,
+	result: Array<Node | string | SelfToken>,
 ): void {
 	if (Array.isArray(value)) {
 		for (const item of value) {
@@ -504,7 +590,13 @@ function collectRenderValues(
 		return;
 	}
 
-	if (isFragmentNode(value)) {
+	if (
+		typeof Node !== "undefined" &&
+		value &&
+		typeof value === "object" &&
+		value instanceof Node &&
+		isFragmentNode(value)
+	) {
 		for (let index = 0; index < value.childNodes.length; index += 1) {
 			collectRenderValues(value.childNodes[index] as RenderValue, result);
 		}

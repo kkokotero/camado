@@ -13,6 +13,7 @@ export interface ComponentMetadata {
 	propertyOptionalKeys: Set<ComponentFieldKey>;
 	childrenKeys: Set<ComponentFieldKey>;
 	childrenOptionalKeys: Set<ComponentFieldKey>;
+	hostKeys: Set<ComponentFieldKey>;
 	slotKeys: Map<ComponentFieldKey, string>;
 	slotOptionalKeys: Set<ComponentFieldKey>;
 	watchers: Map<ComponentFieldKey, Set<ComponentFieldKey>>;
@@ -45,6 +46,7 @@ function createComponentMetadata(): ComponentMetadata {
 		propertyOptionalKeys: new Set<ComponentFieldKey>(),
 		childrenKeys: new Set<ComponentFieldKey>(),
 		childrenOptionalKeys: new Set<ComponentFieldKey>(),
+		hostKeys: new Set<ComponentFieldKey>(),
 		slotKeys: new Map<ComponentFieldKey, string>(),
 		slotOptionalKeys: new Set<ComponentFieldKey>(),
 		watchers: new Map<ComponentFieldKey, Set<ComponentFieldKey>>(),
@@ -138,6 +140,12 @@ export function markPropertyField(
 
 export interface ChildrenFieldOptions {
 	optional?: boolean;
+}
+
+export function markHostField(target: object, key: ComponentFieldKey): void {
+	getOrCreateComponentMetadata(target.constructor as Function).hostKeys.add(
+		key,
+	);
 }
 
 export function markChildrenField(

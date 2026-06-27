@@ -123,7 +123,7 @@ Component, runtime, and rendering primitives.
 Main exports:
 
 - `Component`, `BaseComponent`, `mount`, `prepare`
-- `Channel`, `Bind`, `BaseBinder`
+- `Channel`, `Bind`, `Host`, `BaseBinder`
 - `Children`, `Ref`, `Output`, `Property`, `Slot`
 - lifecycle decorators: `OnMount`, `OnDestroy`, `Delay`, `Interval`
 - metadata/runtime helpers and DOM patch/render utilities
@@ -307,6 +307,44 @@ class App extends BaseComponent {
 }
 
 mount(document.body, App.component());
+```
+
+#### `@Host`
+
+`@Host()` injects the current component instance into a binder field.
+
+Example:
+
+```ts
+import { BaseBinder, BaseComponent, Host } from "camado/core";
+
+class ThemeBinder extends BaseBinder {
+  @Host()
+  host!: BaseComponent;
+
+  readHost() {
+    return this.host;
+  }
+}
+```
+
+#### `Self`
+
+`Self(...)` is a render-time constructor for the component host itself, like `Div(...)` or `Svg(...)` for the host element. Put all of its children inside the call, and use it as the root of `render()`. If you place it inside another HTML/SVG constructor, Camado throws.
+
+Example:
+
+```ts
+import { BaseComponent, Component, Self } from "camado/core";
+import { Attribute } from "camado/modifiers";
+import { Span } from "camado/html";
+
+@Component({ selector: "profile-card" })
+class ProfileCard extends BaseComponent {
+  protected override render() {
+    return Self(Attribute.class("profile-card"), Span("Body"));
+  }
+}
 ```
 
 #### `Channel`

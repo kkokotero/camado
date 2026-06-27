@@ -1,6 +1,7 @@
 export { BaseBinder } from "./binder.ts";
 export type { BinderContext } from "./binder.ts";
 export { Bind } from "./bind.ts";
+export { Host } from "./host.ts";
 export { Channel } from "./channel.ts";
 export { BaseComponent } from "./base-component.ts";
 export { Children } from "./children.ts";
@@ -26,6 +27,7 @@ export * from "./dom.ts";
 export * from "./factories.ts";
 export * from "./metadata.ts";
 export { Static } from "./metadata-decorators.ts";
+export { Self } from "./self.ts";
 export { createNodeRef, isNodeDescriptor } from "./node.ts";
 export type {
 	NodeDescriptor,

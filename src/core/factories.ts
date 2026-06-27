@@ -5,6 +5,7 @@ import type { ControlToken } from "../control/index.ts";
 import type { StyleToken } from "../modifiers/style.ts";
 import type { StyleBuilder } from "../modifiers/style-builder.ts";
 import type { FormFieldState } from "../validator/index.ts";
+import type { SelfToken } from "./self.ts";
 
 export interface ModifierToken {
 	readonly kind: "modifier";
@@ -72,6 +73,7 @@ export type ChildValue =
 	| ObserverToken
 	| FormFieldState<unknown>
 	| ControlToken
+	| SelfToken
 	| readonly ChildValue[];
 
 export interface ElementFactoryOptions {

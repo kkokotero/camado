@@ -259,8 +259,15 @@ Object.defineProperty(globalThis, "customElements", {
 	},
 });
 
-const { BaseComponent, Children, Component, Property, Slot, createNodeRef } =
-	await import("../../src/core/index.ts");
+const {
+	BaseComponent,
+	Children,
+	Component,
+	Property,
+	Self,
+	Slot,
+	createNodeRef,
+} = await import("../../src/core/index.ts");
 const { Reactive } = await import("../../src/reactive/index.ts");
 const { patchRender } = await import("../../src/core/patch.ts");
 const { Attribute, Event: EventToken } = await import(
@@ -353,6 +360,79 @@ class DomPatchComponent extends BaseComponent {
 		);
 	}
 }
+
+@Component({ selector: "camado-self-host" })
+class SelfHostComponent extends BaseComponent {
+	@Property()
+	label = "one";
+
+	protected override render() {
+		return Self(Attribute.class("selfy"), Span(Text(this.label)));
+	}
+}
+
+void SelfHostComponent;
+
+test("Self applies modifiers to the component host", async () => {
+	const host = SelfHostComponent.create() as any;
+	host.children = [];
+	Object.defineProperty(host, "childNodes", {
+		configurable: true,
+		get: () => host.children,
+	});
+	host.append = (...nodes: any[]) => {
+		for (const node of nodes) {
+			node.parentNode = host;
+			host.children.push(node);
+		}
+	};
+	host.replaceChildren = (...nodes: any[]) => {
+		for (const child of [...host.children]) {
+			child.parentNode = null;
+		}
+		host.children = [];
+		host.append(...nodes);
+	};
+	host.replaceChild = (newNode: any, oldNode: any) => {
+		const index = host.children.indexOf(oldNode);
+		if (index === -1) return;
+		newNode.parentNode = host;
+		oldNode.parentNode = null;
+		host.children.splice(index, 1, newNode);
+	};
+	host.removeChild = (node: any) => {
+		const index = host.children.indexOf(node);
+		if (index === -1) return;
+		node.parentNode = null;
+		host.children.splice(index, 1);
+	};
+	host.connectedCallback();
+	await Promise.resolve();
+	await Promise.resolve();
+
+	expect(host.getAttribute("class")).toBe("selfy");
+	expect(extractText(host)).toContain("one");
+});
+
+test("Self throws when nested inside an html constructor", () => {
+	expect(() =>
+		patchRender(
+			new MockElement("root") as any,
+			Div(Self(Attribute.class("x"))),
+		),
+	).toThrow(
+		"Camado Self(...) must be the first render value and can only target the component host.",
+	);
+});
+
+test("Self must be the first render value", () => {
+	expect(() =>
+		patchRender(
+			new MockElement("root") as any,
+			[Span(Text("x")), Self(Attribute.class("x"))] as any,
+		),
+	).toThrow("Camado Self(...) must be the first render value.");
+});
 
 test("granular DOM patch preserves element identity and updates text/attrs", async () => {
 	const host = DomPatchComponent.create() as any;
