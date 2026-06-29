@@ -416,14 +416,15 @@ test("Output dispatches a custom event to external listeners", () => {
 	}
 });
 
-
 test("Readonly property assignment through the host proxy does not throw", () => {
 	const previousDocument = globalThis.document;
 	(globalThis as typeof globalThis & { document: Document }).document =
 		createTestDocument();
 
 	try {
-		expect(() => TestReadonlyProp.create({ theme: "dark" } as any)).not.toThrow();
+		expect(() =>
+			TestReadonlyProp.create({ theme: "dark" } as any),
+		).not.toThrow();
 		const component = TestReadonlyProp.create({ theme: "dark" } as any);
 		expect(component.theme).toBe("light");
 	} finally {
