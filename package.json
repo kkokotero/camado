@@ -78,6 +78,7 @@
     "prepublishOnly": "bun run build",
     "build": "tsup",
     "test": "vitest run",
+    "test:browser": "vitest run --project browser",
     "test:watch": "vitest",
     "generate:tags": "bun scripts/generate-tags.ts"
   },
@@ -95,7 +96,9 @@
   "license": "MIT",
   "devDependencies": {
     "@types/node": "latest",
+    "@vitest/browser-playwright": "^4.1.9",
     "bun-types": "latest",
+    "playwright": "^1.61.1",
     "tsup": "^8.5.1",
     "vitest": "^4.1.9"
   },
