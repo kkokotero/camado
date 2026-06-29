@@ -13,7 +13,6 @@ class BrowserReadonlyProp extends BaseComponent {
 	}
 }
 
-
 test("readonly property assignment does not throw in a real browser", async () => {
 	const element = BrowserReadonlyProp.create({ theme: "dark" } as any);
 
