@@ -46,15 +46,7 @@ export function invokeComponent<TComponent extends BaseComponent>(
 		if (metadata?.events.has(key)) {
 			if (typeof value === "function") {
 				outputCallbacks[key] = value as (detail: unknown) => unknown;
-				continue;
 			}
-
-			if (metadata.eventRequiredKeys.has(key)) {
-				throw new Error(
-					`Camado output "${key}" is required for ${selector || component.name}.`,
-				);
-			}
-
 			continue;
 		}
 
@@ -85,10 +77,7 @@ function validateRequiredInvocationInputs(
 			continue;
 		}
 
-		if (
-			!(key in directProps) ||
-			directProps[key] === undefined
-		) {
+		if (!(key in directProps) || directProps[key] === undefined) {
 			if (metadata.propertyRequiredKeys.has(key)) {
 				throw new Error(
 					`Camado property "${key}" is required for ${componentName}.`,
@@ -108,8 +97,8 @@ function validateRequiredInvocationInputs(
 	}
 
 	if (metadata.childrenKeys.size > 0 && childValues.length === 0) {
-		const requiredChild = [...metadata.childrenKeys].find(
-			(key) => metadata.childrenRequiredKeys.has(key),
+		const requiredChild = [...metadata.childrenKeys].find((key) =>
+			metadata.childrenRequiredKeys.has(key),
 		);
 		if (requiredChild !== undefined) {
 			throw new Error(
@@ -118,17 +107,6 @@ function validateRequiredInvocationInputs(
 		}
 	}
 
-	for (const key of metadata.events.keys()) {
-		if (typeof directProps[String(key)] === "function") {
-			continue;
-		}
-
-		if (metadata.eventRequiredKeys.has(key)) {
-			throw new Error(
-				`Camado output "${String(key)}" is required for ${componentName}.`,
-			);
-		}
-	}
 }
 
 function applyChildren<TComponent extends BaseComponent>(

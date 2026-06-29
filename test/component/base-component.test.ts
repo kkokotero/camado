@@ -214,18 +214,6 @@ class TestEventInput extends BaseComponent {
 	}
 }
 
-@Component({ selector: "camado-test-optional-event-input" })
-class TestOptionalEventInput extends BaseComponent {
-	protected override render() {
-		return null;
-	}
-
-	@Output({ optional: true })
-	emitOptional() {
-		return { ok: true } as const;
-	}
-}
-
 @Component({ selector: "camado-test-derived" })
 class TestDerivedReactive extends BaseComponent {
 	@Property()
@@ -393,41 +381,23 @@ test("BaseComponent tracks reactive fields and lifecycle hooks", async () => {
 	}
 });
 
-test("@Input passes only the emitted payload to input callbacks", () => {
+test("Output dispatches a custom event to external listeners", () => {
 	const previousDocument = globalThis.document;
 	(globalThis as typeof globalThis & { document: Document }).document =
 		createTestDocument();
 
 	try {
 		let called = false;
-		const eventHost = TestEventInput.create({
-			emitSaved: (detail: { ok: true }) => {
-				called = true;
-				expect(detail).toEqual({ ok: true });
-			},
+		const eventHost = TestEventInput.create();
+		eventHost.addEventListener("emitSaved", (event: Event) => {
+			called = true;
+			expect((event as CustomEvent).detail).toEqual({ ok: true });
 		});
 
 		const result = eventHost.emitSaved();
 
 		expect(result).toEqual({ ok: true });
 		expect(called).toBe(true);
-	} finally {
-		(globalThis as typeof globalThis & { document: Document }).document =
-			previousDocument as Document;
-	}
-});
-
-
-test("Output throws when required callback is missing", () => {
-	const previousDocument = globalThis.document;
-	(globalThis as typeof globalThis & { document: Document }).document =
-		createTestDocument();
-
-	try {
-		expect(() => TestEventInput.create()).toThrow(
-			'Camado output "emitSaved" is required for camado-test-event-input.',
-		);
-		expect(() => TestOptionalEventInput.create()).not.toThrow();
 	} finally {
 		(globalThis as typeof globalThis & { document: Document }).document =
 			previousDocument as Document;

@@ -87,7 +87,6 @@ test("Component invocation applies props, children, and slot fields", () => {
 	}
 });
 
-
 test("Component invocation throws when required props or projected content are missing", () => {
 	const previousDocument = globalThis.document;
 	(globalThis as typeof globalThis & { document: Document }).document = {
@@ -99,7 +98,11 @@ test("Component invocation throws when required props or projected content are m
 			} as unknown as HTMLElement;
 		},
 		createDocumentFragment() {
-			return { childNodes: [], append() {}, cloneNode: () => ({ childNodes: [] }) } as unknown as DocumentFragment;
+			return {
+				childNodes: [],
+				append() {},
+				cloneNode: () => ({ childNodes: [] }),
+			} as unknown as DocumentFragment;
 		},
 		createTextNode(value: string) {
 			return { nodeType: 3, textContent: value } as unknown as Text;
@@ -112,21 +115,15 @@ test("Component invocation throws when required props or projected content are m
 		expect(() => invocation({} as any)).toThrow(
 			'Camado property "label" is required for camado-invoke-test.',
 		);
-		expect(() =>
-			invocation({ label: "ok" } as any),
-		).toThrow(
+		expect(() => invocation({ label: "ok" } as any)).toThrow(
 			'Camado slot "footer" is required for camado-invoke-test.',
 		);
 		expect(() =>
 			invocation({ label: "ok", footer: Text("slot") } as any),
-		).toThrow(
-			'Camado children "content" is required for camado-invoke-test.',
-		);
+		).toThrow('Camado children "content" is required for camado-invoke-test.');
 		expect(() =>
 			invocation({ label: "ok", children: Text("child") } as any),
-		).toThrow(
-			'Camado slot "footer" is required for camado-invoke-test.',
-		);
+		).toThrow('Camado slot "footer" is required for camado-invoke-test.');
 	} finally {
 		(globalThis as typeof globalThis & { document: Document }).document =
 			previousDocument as Document;
