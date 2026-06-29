@@ -71,7 +71,7 @@ export abstract class BaseBinder<
 
 		const wasEmpty = this.#contexts.size === 0;
 		this.#contexts.set(context.component, context);
-		this.#syncHostFields(context.component);
+		this.#syncHostFields(context.host);
 		this.bind(context);
 		if (wasEmpty) {
 			this.onConnect(context);
@@ -89,10 +89,10 @@ export abstract class BaseBinder<
 		if (wasLast) {
 			this.onDisconnect(context);
 		}
-		this.#syncHostFields(this.#contexts.values().next().value?.component);
+		this.#syncHostFields(this.#contexts.values().next().value?.host);
 	}
 
-	#syncHostFields(component?: BaseComponent): void {
+	#syncHostFields(host?: HTMLElement): void {
 		const hostKeys = getComponentMetadata(
 			this.constructor as Function,
 		)?.hostKeys;
@@ -101,7 +101,7 @@ export abstract class BaseBinder<
 		}
 
 		for (const key of hostKeys) {
-			(this as Record<string | symbol, unknown>)[key] = component;
+			(this as Record<string | symbol, unknown>)[key] = host;
 		}
 	}
 
