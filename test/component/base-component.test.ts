@@ -9,11 +9,12 @@ import {
 	Output,
 	Property,
 	Host,
+	Query,
 	getComponentMetadata,
 } from "../../src/core/index.ts";
 import { Event, Reactive, Watch } from "../../src/reactive/index.ts";
 import { Attribute } from "../../src/modifiers/index.ts";
-import { Div, Input, Span } from "../../src/html/index.ts";
+import { Div, Input } from "../../src/html/index.ts";
 
 const customElementsRegistry = new Map<string, CustomElementConstructor>();
 Object.defineProperty(globalThis, "customElements", {
@@ -289,6 +290,19 @@ class TestHostField extends BaseComponent {
 	}
 }
 
+@Component({ selector: "camado-test-inherited-query" })
+class TestInheritedQueryBase extends BaseComponent {
+	@Query("#name")
+	nameInput!: HTMLInputElement | null;
+
+	protected override render() {
+		return Div(Input(Attribute.id("name")));
+	}
+}
+
+@Component({ selector: "camado-test-inherited-query-child" })
+class TestInheritedQueryChild extends TestInheritedQueryBase {}
+
 test("Host decorates the component field with the custom element host", async () => {
 	const previousDocument = globalThis.document;
 	(globalThis as typeof globalThis & { document: Document }).document =
@@ -301,6 +315,24 @@ test("Host decorates the component field with the custom element host", async ()
 		await Promise.resolve();
 
 		expect(component.host).toBe(component);
+	} finally {
+		(globalThis as typeof globalThis & { document: Document }).document =
+			previousDocument as Document;
+	}
+});
+
+test("Inherited Query decorators resolve on derived components", async () => {
+	const previousDocument = globalThis.document;
+	(globalThis as typeof globalThis & { document: Document }).document =
+		createTestDocument();
+
+	try {
+		const component = TestInheritedQueryChild.create();
+		component.connectedCallback();
+		await Promise.resolve();
+		await Promise.resolve();
+
+		expect(component.nameInput?.tagName.toLowerCase()).toBe("input");
 	} finally {
 		(globalThis as typeof globalThis & { document: Document }).document =
 			previousDocument as Document;

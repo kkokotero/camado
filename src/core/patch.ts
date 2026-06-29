@@ -542,26 +542,15 @@ function collectSelfChild(value: unknown, result: Array<Node | string>): void {
 		return;
 	}
 
-	if (
-		typeof Node !== "undefined" &&
-		value &&
-		typeof value === "object" &&
-		value instanceof Node &&
-		isFragmentNode(value)
-	) {
+	if (isFragmentLike(value)) {
 		for (let index = 0; index < value.childNodes.length; index += 1) {
 			collectSelfChild(value.childNodes[index], result);
 		}
 		return;
 	}
 
-	if (
-		typeof Node !== "undefined" &&
-		value &&
-		typeof value === "object" &&
-		value instanceof Node
-	) {
-		result.push(value);
+	if (isNodeLike(value)) {
+		result.push(value as Node);
 	}
 }
 
@@ -590,13 +579,7 @@ function collectRenderValues(
 		return;
 	}
 
-	if (
-		typeof Node !== "undefined" &&
-		value &&
-		typeof value === "object" &&
-		value instanceof Node &&
-		isFragmentNode(value)
-	) {
+	if (isFragmentLike(value)) {
 		for (let index = 0; index < value.childNodes.length; index += 1) {
 			collectRenderValues(value.childNodes[index] as RenderValue, result);
 		}
@@ -604,6 +587,17 @@ function collectRenderValues(
 	}
 
 	result.push(value);
+}
+
+function isNodeLike(value: unknown): value is { nodeType: number } {
+	return (
+		typeof value === "object" &&
+		value !== null &&
+		typeof Reflect.get(
+			value as Record<string | symbol, unknown>,
+			"nodeType",
+		) === "number"
+	);
 }
 
 function isTextNode(node: Node): node is Text {
@@ -616,6 +610,12 @@ function isElementNode(node: Node): node is Element {
 
 function isFragmentNode(node: Node): node is DocumentFragment {
 	return node.nodeType === 11;
+}
+
+function isFragmentLike(
+	value: unknown,
+): value is { nodeType: number; childNodes: ArrayLike<unknown> } {
+	return isNodeLike(value) && (value as { nodeType: number }).nodeType === 11;
 }
 
 function isSameElement(current: Element, next: Element): boolean {

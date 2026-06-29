@@ -358,60 +358,89 @@ export function installTrackedFields(
 	}
 }
 
+function getComponentMetadataChain(ctor: Function): ComponentMetadata[] {
+	const chain: ComponentMetadata[] = [];
+	let current: Function | undefined = ctor;
+
+	while (current && current !== Object) {
+		const metadata = getComponentMetadata(current);
+		if (metadata) {
+			chain.unshift(metadata);
+		}
+
+		const parent = Object.getPrototypeOf(current.prototype)?.constructor;
+		if (!parent || parent === current || parent === Object) {
+			break;
+		}
+
+		current = parent as Function;
+	}
+
+	return chain;
+}
+
 export function installHostFields(
 	instance: Record<string | symbol, unknown>,
 ): void {
-	const metadata = getComponentMetadata(instance.constructor as Function);
-	if (!metadata || metadata.hostKeys.size === 0) {
+	const metadataChain = getComponentMetadataChain(
+		instance.constructor as Function,
+	);
+	if (metadataChain.length === 0) {
 		return;
 	}
 
-	for (const key of metadata.hostKeys) {
-		Reflect.deleteProperty(instance, key);
-		Object.defineProperty(instance, key, {
-			configurable: true,
-			enumerable: true,
-			get() {
-				return (instance as { hostElement?: HTMLElement }).hostElement;
-			},
-		});
+	for (const metadata of metadataChain) {
+		for (const key of metadata.hostKeys) {
+			Reflect.deleteProperty(instance, key);
+			Object.defineProperty(instance, key, {
+				configurable: true,
+				enumerable: true,
+				get() {
+					return (instance as { hostElement?: HTMLElement }).hostElement;
+				},
+			});
+		}
 	}
 }
 
 export function installQueryFields(
 	instance: Record<string | symbol, unknown>,
 ): void {
-	const metadata = getComponentMetadata(instance.constructor as Function);
-	if (!metadata || metadata.queryKeys.size === 0) {
+	const metadataChain = getComponentMetadataChain(
+		instance.constructor as Function,
+	);
+	if (metadataChain.length === 0) {
 		return;
 	}
 
 	const host = (instance as { hostElement?: HTMLElement }).hostElement;
 
-	for (const [key, config] of metadata.queryKeys) {
-		Reflect.deleteProperty(instance, key);
-		Object.defineProperty(instance, key, {
-			configurable: true,
-			enumerable: true,
-			get() {
-				if (!host) {
-					return config.multiple ? [] : null;
-				}
+	for (const metadata of metadataChain) {
+		for (const [key, config] of metadata.queryKeys) {
+			Reflect.deleteProperty(instance, key);
+			Object.defineProperty(instance, key, {
+				configurable: true,
+				enumerable: true,
+				get() {
+					if (!host) {
+						return config.multiple ? [] : null;
+					}
 
-				if (typeof config.selector === "function") {
-					const result = config.selector(host);
+					if (typeof config.selector === "function") {
+						const result = config.selector(host);
+						return config.multiple
+							? Array.from(
+									(result ?? []) as ArrayLike<unknown> | Iterable<unknown>,
+								)
+							: (result ?? null);
+					}
+
 					return config.multiple
-						? Array.from(
-								(result ?? []) as ArrayLike<unknown> | Iterable<unknown>,
-							)
-						: (result ?? null);
-				}
-
-				return config.multiple
-					? findQueryMatches(host, config.selector, false)
-					: (findQueryMatches(host, config.selector, true)[0] ?? null);
-			},
-		});
+						? findQueryMatches(host, config.selector, false)
+						: (findQueryMatches(host, config.selector, true)[0] ?? null);
+				},
+			});
+		}
 	}
 }
 

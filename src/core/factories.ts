@@ -97,6 +97,22 @@ function registerNodeRef(target: Node, ref: NodeRef): void {
 	nodeRefsByTarget.set(target, current);
 }
 
+function isNodeLike(value: unknown): value is {
+	nodeType: number;
+	append?: (...nodes: unknown[]) => void;
+	childNodes?: ArrayLike<unknown>;
+	children?: ArrayLike<unknown>;
+} {
+	return (
+		typeof value === "object" &&
+		value !== null &&
+		typeof Reflect.get(
+			value as Record<string | symbol, unknown>,
+			"nodeType",
+		) === "number"
+	);
+}
+
 export function createElementFactory(
 	tagName: string,
 	options: ElementFactoryOptions = {},
@@ -133,15 +149,26 @@ export function appendChildValue(target: ParentNode, value: ChildValue): void {
 		return;
 	}
 
-	if (typeof Node !== "undefined" && value instanceof Node) {
-		target.append(value);
+	if (isNodeLike(value)) {
+		if (value.nodeType === 11) {
+			const children = value.childNodes ?? value.children ?? [];
+			for (const child of Array.from(children)) {
+				appendChildValue(target, child as ChildValue);
+			}
+			return;
+		}
+
+		target.append(value as unknown as Node);
 		return;
 	}
 
 	if (isNodeRef(value)) {
-		if (typeof Node !== "undefined" && target instanceof Node) {
-			value.current = target;
-			registerNodeRef(target, value);
+		if (
+			(typeof Node !== "undefined" && target instanceof Node) ||
+			isNodeLike(target)
+		) {
+			value.current = target as unknown as Node;
+			registerNodeRef(target as unknown as Node, value);
 		} else {
 			value.current = null;
 		}

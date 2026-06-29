@@ -81,8 +81,16 @@ class FallbackHostElement {
 	replaceChildren(...nodes: Array<Node | string>): void {
 		for (const child of this.children) {
 			if (typeof child === "object" && child !== null) {
-				Reflect.set(child as unknown as Record<string | symbol, unknown>, "parentNode", null);
-				Reflect.set(child as unknown as Record<string | symbol, unknown>, "parentElement", null);
+				Reflect.set(
+					child as unknown as Record<string | symbol, unknown>,
+					"parentNode",
+					null,
+				);
+				Reflect.set(
+					child as unknown as Record<string | symbol, unknown>,
+					"parentElement",
+					null,
+				);
 			}
 		}
 
@@ -93,8 +101,16 @@ class FallbackHostElement {
 	append(...nodes: Array<Node | string>): void {
 		for (const node of nodes) {
 			if (typeof node === "object" && node !== null) {
-				Reflect.set(node as unknown as Record<string | symbol, unknown>, "parentNode", this);
-				Reflect.set(node as unknown as Record<string | symbol, unknown>, "parentElement", this);
+				Reflect.set(
+					node as unknown as Record<string | symbol, unknown>,
+					"parentNode",
+					this,
+				);
+				Reflect.set(
+					node as unknown as Record<string | symbol, unknown>,
+					"parentElement",
+					this,
+				);
 			}
 			this.children.push(node);
 		}
@@ -113,8 +129,16 @@ class FallbackHostElement {
 		}
 
 		if (typeof node === "object" && node !== null) {
-			Reflect.set(node as unknown as Record<string | symbol, unknown>, "parentNode", this);
-			Reflect.set(node as unknown as Record<string | symbol, unknown>, "parentElement", this);
+			Reflect.set(
+				node as unknown as Record<string | symbol, unknown>,
+				"parentNode",
+				this,
+			);
+			Reflect.set(
+				node as unknown as Record<string | symbol, unknown>,
+				"parentElement",
+				this,
+			);
 		}
 		this.children.splice(index, 0, node);
 	}
@@ -134,10 +158,15 @@ class FallbackHostElement {
 				return current;
 			}
 
-			current = Reflect.get(
-				current as unknown as Record<string | symbol, unknown>,
-				"parentElement",
-			) ?? Reflect.get(current as unknown as Record<string | symbol, unknown>, "parentNode");
+			current =
+				Reflect.get(
+					current as unknown as Record<string | symbol, unknown>,
+					"parentElement",
+				) ??
+				Reflect.get(
+					current as unknown as Record<string | symbol, unknown>,
+					"parentNode",
+				);
 		}
 
 		return null;
@@ -180,12 +209,18 @@ function getChildren(value: unknown): unknown[] {
 		return [];
 	}
 
-	const children = Reflect.get(value as unknown as Record<string | symbol, unknown>, "children");
+	const children = Reflect.get(
+		value as unknown as Record<string | symbol, unknown>,
+		"children",
+	);
 	if (Array.isArray(children)) {
 		return children;
 	}
 
-	const childNodes = Reflect.get(value as unknown as Record<string | symbol, unknown>, "childNodes");
+	const childNodes = Reflect.get(
+		value as unknown as Record<string | symbol, unknown>,
+		"childNodes",
+	);
 	if (Array.isArray(childNodes)) {
 		return childNodes;
 	}
@@ -219,7 +254,10 @@ function getTagName(value: unknown): string | undefined {
 		return undefined;
 	}
 
-	const tagName = Reflect.get(value as unknown as Record<string | symbol, unknown>, "tagName");
+	const tagName = Reflect.get(
+		value as unknown as Record<string | symbol, unknown>,
+		"tagName",
+	);
 	return typeof tagName === "string" ? tagName.toUpperCase() : undefined;
 }
 
@@ -228,12 +266,18 @@ function getAttribute(value: unknown, name: string): string | null {
 		return null;
 	}
 
-	const getter = Reflect.get(value as unknown as Record<string | symbol, unknown>, "getAttribute");
+	const getter = Reflect.get(
+		value as unknown as Record<string | symbol, unknown>,
+		"getAttribute",
+	);
 	if (typeof getter === "function") {
 		return getter.call(value, name) as string | null;
 	}
 
-	const direct = Reflect.get(value as unknown as Record<string | symbol, unknown>, name);
+	const direct = Reflect.get(
+		value as unknown as Record<string | symbol, unknown>,
+		name,
+	);
 	return typeof direct === "string" ? direct : null;
 }
 
@@ -242,21 +286,33 @@ function hasClass(value: unknown, className: string): boolean {
 		return false;
 	}
 
-	const classList = Reflect.get(value as unknown as Record<string | symbol, unknown>, "classList");
+	const classList = Reflect.get(
+		value as unknown as Record<string | symbol, unknown>,
+		"classList",
+	);
 	if (classList && typeof classList === "object") {
-		const contains = Reflect.get(classList as unknown as Record<string | symbol, unknown>, "contains");
+		const contains = Reflect.get(
+			classList as unknown as Record<string | symbol, unknown>,
+			"contains",
+		);
 		if (typeof contains === "function") {
 			return Boolean(contains.call(classList, className));
 		}
 
-		const values = Reflect.get(classList as unknown as Record<string | symbol, unknown>, "values");
+		const values = Reflect.get(
+			classList as unknown as Record<string | symbol, unknown>,
+			"values",
+		);
 		if (Array.isArray(values)) {
 			return values.includes(className);
 		}
 	}
 
-	const classAttr = getAttribute(value, "class") ?? getAttribute(value, "className");
-	return typeof classAttr === "string" && classAttr.split(/\s+/).includes(className);
+	const classAttr =
+		getAttribute(value, "class") ?? getAttribute(value, "className");
+	return (
+		typeof classAttr === "string" && classAttr.split(/\s+/).includes(className)
+	);
 }
 
 function getHostElementBase(): typeof HTMLElement | typeof FallbackHostElement {
@@ -267,20 +323,30 @@ type ComponentHostInstance<TComponent extends BaseComponent> = HTMLElement & {
 	[componentInstanceSymbol]: TComponent;
 };
 
-function collectHostKeys(
-	metadata: ReturnType<typeof getComponentMetadata>,
-): Array<string | symbol> {
-	if (!metadata) {
-		return [];
+function collectHostKeys(ctor: Function): Array<string | symbol> {
+	const keys = new Set<string | symbol>();
+	let current: Function | undefined = ctor;
+
+	while (current && current !== Object) {
+		const metadata = getComponentMetadata(current);
+		if (metadata) {
+			for (const key of metadata.propertyKeys) keys.add(key);
+			for (const key of metadata.reactiveKeys) keys.add(key);
+			for (const key of metadata.childrenKeys) keys.add(key);
+			for (const key of metadata.hostKeys) keys.add(key);
+			for (const key of metadata.queryKeys.keys()) keys.add(key);
+			for (const key of metadata.slotKeys.keys()) keys.add(key);
+			for (const key of metadata.binders.keys()) keys.add(key);
+		}
+
+		const parent = Object.getPrototypeOf(current.prototype)?.constructor;
+		if (!parent || parent === current || parent === Object) {
+			break;
+		}
+		current = parent as Function;
 	}
 
-	return [
-		...metadata.propertyKeys,
-		...metadata.reactiveKeys,
-		...metadata.childrenKeys,
-		...metadata.slotKeys.keys(),
-		...metadata.binders.keys(),
-	];
+	return [...keys];
 }
 
 function hydrateHostFromLightDom<TComponent extends BaseComponent>(
@@ -560,7 +626,7 @@ export function defineComponentHost<TComponent extends BaseComponent>(
 	}
 
 	const metadata = getComponentMetadata(component as Function);
-	const hostKeys = collectHostKeys(metadata);
+	const hostKeys = collectHostKeys(component as Function);
 	const HostElementBase = getHostElementBase();
 
 	class CamadoComponentHost extends HostElementBase {
