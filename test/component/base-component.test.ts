@@ -214,6 +214,18 @@ class TestEventInput extends BaseComponent {
 	}
 }
 
+@Component({ selector: "camado-test-readonly-prop" })
+class TestReadonlyProp extends BaseComponent {
+	@Property()
+	get theme() {
+		return "light";
+	}
+
+	protected override render() {
+		return null;
+	}
+}
+
 @Component({ selector: "camado-test-derived" })
 class TestDerivedReactive extends BaseComponent {
 	@Property()
@@ -398,6 +410,22 @@ test("Output dispatches a custom event to external listeners", () => {
 
 		expect(result).toEqual({ ok: true });
 		expect(called).toBe(true);
+	} finally {
+		(globalThis as typeof globalThis & { document: Document }).document =
+			previousDocument as Document;
+	}
+});
+
+
+test("Readonly property assignment through the host proxy does not throw", () => {
+	const previousDocument = globalThis.document;
+	(globalThis as typeof globalThis & { document: Document }).document =
+		createTestDocument();
+
+	try {
+		expect(() => TestReadonlyProp.create({ theme: "dark" } as any)).not.toThrow();
+		const component = TestReadonlyProp.create({ theme: "dark" } as any);
+		expect(component.theme).toBe("light");
 	} finally {
 		(globalThis as typeof globalThis & { document: Document }).document =
 			previousDocument as Document;
