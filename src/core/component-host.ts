@@ -506,7 +506,11 @@ export function defineFragmentBackedField<TComponent extends BaseComponent>(
 			return fragment;
 		},
 		set: (next: unknown) => {
-			current = collectFragmentBackingValues(next);
+			const nextValues = collectFragmentBackingValues(next);
+			if (areFragmentBackingValuesEqual(current, nextValues)) {
+				return;
+			}
+			current = nextValues;
 			onChange?.();
 		},
 	});
@@ -548,6 +552,23 @@ function collectFragmentBackingValues(
 
 	result.push(value as ChildValue);
 	return result;
+}
+
+function areFragmentBackingValuesEqual(
+	current: readonly ChildValue[],
+	next: readonly ChildValue[],
+): boolean {
+	if (current.length !== next.length) {
+		return false;
+	}
+
+	for (let index = 0; index < current.length; index += 1) {
+		if (!Object.is(current[index], next[index])) {
+			return false;
+		}
+	}
+
+	return true;
 }
 
 function cloneChildValue(value: ChildValue): ChildValue {
@@ -735,7 +756,9 @@ export function defineComponentHost<TComponent extends BaseComponent>(
 								instance,
 								key,
 								createFragment(...collectFragmentBackingValues(next)),
+								() => instance.__requestUpdate(),
 							);
+							instance.__requestUpdate();
 							return;
 						}
 

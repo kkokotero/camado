@@ -362,12 +362,26 @@ function syncComponentHostState(current: Node, next: Node): void {
 			continue;
 		}
 
-		if (preserveUndefined && source[key] === undefined) {
+		const nextValue = source[key];
+		if (preserveUndefined && nextValue === undefined) {
 			continue;
 		}
 
-		target[key] = source[key];
+		if (isFragmentLikeValue(nextValue)) {
+			continue;
+		}
+
+		target[key] = nextValue;
 	}
+}
+
+function isFragmentLikeValue(value: unknown): value is DocumentFragment {
+	return (
+		typeof value === "object" &&
+		value !== null &&
+		"nodeType" in value &&
+		(value as Node).nodeType === 11
+	);
 }
 
 function syncEventListeners(current: Node, next: Node): void {

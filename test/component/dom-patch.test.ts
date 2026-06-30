@@ -263,6 +263,7 @@ const {
 	BaseComponent,
 	Children,
 	Component,
+	OnMount,
 	Property,
 	Query,
 	Queries,
@@ -275,7 +276,9 @@ const { patchRender } = await import("../../src/core/patch.ts");
 const { Attribute, Event: EventToken } = await import(
 	"../../src/modifiers/index.ts"
 );
-const { Button, Div, Input, Span, Text } = await import("../../src/html/index.ts");
+const { Button, Div, Fragment, Input, Span, Text } = await import(
+	"../../src/html/index.ts"
+);
 
 @Component({ selector: "camado-dom-hydration" })
 class DomHydrationComponent extends BaseComponent {
@@ -420,7 +423,8 @@ test("Self applies modifiers to the component host", async () => {
 class QueryDemoComponent extends BaseComponent {
 	@Query((host) => {
 		const root = (host as any).children?.[0] ?? (host as any).childNodes?.[0];
-		return (root?.children?.[0] ?? root?.childNodes?.[0]) as HTMLInputElement | null;
+		return (root?.children?.[0] ??
+			root?.childNodes?.[0]) as HTMLInputElement | null;
 	})
 	nameInput!: HTMLInputElement | null;
 
@@ -448,7 +452,6 @@ test("Query and Queries resolve from the host tree", async () => {
 	expect(host.items).toHaveLength(2);
 });
 
-
 test("Self throws when nested inside an html constructor", () => {
 	expect(() =>
 		patchRender(
@@ -458,6 +461,80 @@ test("Self throws when nested inside an html constructor", () => {
 	).toThrow(
 		"Camado Self(...) must be the first render value and can only target the component host.",
 	);
+});
+
+test("Self projected nested hosts rerender after wrapper updates", async () => {
+	@Component({ selector: "camado-nested-icon" })
+	class NestedIcon extends BaseComponent {
+		@Property()
+		name = "percent";
+
+		protected override render() {
+			return Span(Text(this.name));
+		}
+	}
+
+	@Component({ selector: "camado-nested-button" })
+	class NestedButton extends BaseComponent {
+		@Children({ optional: true })
+		children?: any;
+
+		protected override render() {
+			return Button(this.children);
+		}
+	}
+
+	@Component({ selector: "camado-nested-wrapper" })
+	class NestedWrapper extends BaseComponent {
+		@Property({ optional: true })
+		content?: any;
+
+		@Property({ optional: true })
+		mounted = false;
+
+		@OnMount()
+		protected flipMounted() {
+			this.mounted = true;
+		}
+
+		protected override render() {
+			return Self(
+				Attribute.class(this.mounted ? "mounted" : "idle"),
+				this.content,
+			);
+		}
+	}
+
+	void NestedIcon;
+	void NestedButton;
+	void NestedWrapper;
+
+	function connectTree(node: any): void {
+		if (typeof node?.connectedCallback === "function") {
+			node.connectedCallback();
+		}
+		for (const child of node?.childNodes ?? []) {
+			connectTree(child);
+		}
+	}
+
+	const host = NestedWrapper.create({
+		content: NestedButton.create({
+			children: Fragment(NestedIcon.create({ name: "percent" }), Text("Hoa")),
+		}),
+	} as any) as any;
+	host.connectedCallback();
+	connectTree(host);
+	await Promise.resolve();
+	await Promise.resolve();
+	await new Promise((resolve) => setTimeout(resolve, 0));
+	connectTree(host);
+	await Promise.resolve();
+	await Promise.resolve();
+
+	const button = host.childNodes[0] as any;
+	expect(extractText(button)).toContain("percent");
+	expect(extractText(button)).toContain("Hoa");
 });
 
 test("Self must be the first render value", () => {
