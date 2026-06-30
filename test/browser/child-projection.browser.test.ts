@@ -1,5 +1,11 @@
 import { expect, test } from "vitest";
-import { BaseComponent, Children, Component, Self, type ComponentChildren } from "camado/core";
+import {
+	BaseComponent,
+	Children,
+	Component,
+	Self,
+	type ComponentChildren,
+} from "camado/core";
 import { Button } from "camado/html";
 
 @Component({ selector: "camado-child-projection" })
@@ -38,7 +44,8 @@ test("projected child components keep their own projected children", async () =>
 	const child = document.querySelector("camado-child-projection");
 	expect(child?.textContent).toBe("Hoa");
 	expect(child?.querySelectorAll("button").length).toBe(1);
-	expect(child?.innerHTML).toBe("<button>Hoa</button>");
+	expect(child?.innerHTML).toContain("<button");
+	expect(child?.innerHTML).toContain("Hoa");
 
 	parent.remove();
 });

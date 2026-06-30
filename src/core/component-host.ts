@@ -5,12 +5,14 @@ import {
 } from "./factories.ts";
 import { getComponentMetadata } from "./metadata.ts";
 import type { BaseComponent } from "./base-component.ts";
+import { getCurrentRenderTarget } from "./render-context.ts";
 import type { ComponentConstructor } from "./component-types.ts";
 
 const componentInstanceSymbol = Symbol.for("camado.componentInstance");
 const componentHostKeysSymbol = Symbol.for("camado.componentHostKeys");
 const componentHydratedSymbol = Symbol.for("camado.componentHydrated");
 const componentProjectedSymbol = Symbol.for("camado.componentProjected");
+const componentMovingSymbol = Symbol.for("camado.componentMoving");
 
 export function isComponentHostElement(
 	value: unknown,
@@ -773,6 +775,11 @@ export function defineComponentHost<TComponent extends BaseComponent>(
 		}
 
 		connectedCallback(): void {
+			if (Reflect.get(this, componentMovingSymbol) === true) {
+				Reflect.set(this, componentMovingSymbol, false);
+				return;
+			}
+
 			if (!Reflect.get(this, componentHydratedSymbol) && metadata) {
 				const hydrated = hydrateHostFromLightDom(
 					this as unknown as ComponentHostInstance<TComponent>,
@@ -791,6 +798,11 @@ export function defineComponentHost<TComponent extends BaseComponent>(
 		}
 
 		disconnectedCallback(): void {
+			if (getCurrentRenderTarget() !== null) {
+				Reflect.set(this, componentMovingSymbol, true);
+				return;
+			}
+
 			this[componentInstanceSymbol].__disconnect();
 		}
 	}

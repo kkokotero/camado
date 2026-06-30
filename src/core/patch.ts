@@ -119,6 +119,10 @@ function resetAndAppend(
 }
 
 function patchNode(current: Node, next: Node | string): Node {
+	if (current === next) {
+		return current;
+	}
+
 	if (typeof next === "string") {
 		if (current.nodeType === 3) {
 			current.textContent = next;
@@ -367,7 +371,12 @@ function syncComponentHostState(current: Node, next: Node): void {
 			continue;
 		}
 
-		if (isFragmentLikeValue(nextValue)) {
+		const currentValue = target[key];
+		if (
+			isFragmentLikeValue(nextValue) &&
+			isFragmentLikeValue(currentValue) &&
+			currentValue.childNodes.length > 0
+		) {
 			continue;
 		}
 
