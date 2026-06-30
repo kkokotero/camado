@@ -18,7 +18,7 @@ import type {
 	ComponentConstructor,
 	ComponentElement,
 	ComponentFactory,
-	ComponentInvocationOptions,
+	ComponentInvocationArg,
 } from "./component-types.ts";
 import { getComponentOutputCallbacks } from "./output-callbacks.ts";
 import { invokeComponent } from "./component-invoke.ts";
@@ -36,11 +36,11 @@ export type RenderValue =
 
 function createComponentElement<TComponent extends BaseComponent>(
 	this: ComponentConstructor<TComponent>,
-	options?: ComponentInvocationOptions<TComponent>,
+	...args: readonly ComponentInvocationArg<TComponent>[]
 ): ComponentElement<TComponent> {
 	return invokeComponent(
 		this as unknown as ComponentConstructor<TComponent>,
-		options,
+		...args,
 	);
 }
 
@@ -50,8 +50,8 @@ function createComponentFactory<TComponent extends BaseComponent>(
 	ctor: ComponentConstructor<TComponent>;
 } {
 	const ctor = this as unknown as ComponentConstructor<TComponent>;
-	const factory = (options?: ComponentInvocationOptions<TComponent>) =>
-		invokeComponent(ctor, options);
+	const factory = (...args: readonly ComponentInvocationArg<TComponent>[]) =>
+		invokeComponent(ctor, ...args);
 
 	return Object.assign(factory, { ctor });
 }
@@ -74,7 +74,7 @@ export abstract class BaseComponent {
 
 	static create: <TComponent extends BaseComponent>(
 		this: ComponentConstructor<TComponent>,
-		options?: ComponentInvocationOptions<TComponent>,
+		...args: readonly ComponentInvocationArg<TComponent>[]
 	) => ComponentElement<TComponent>;
 
 	static component: <TComponent extends BaseComponent>(

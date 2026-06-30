@@ -22,6 +22,8 @@
 
 # Camado
 
+Current version: `0.4.12`.
+
 Camado is a TypeScript UI framework built on native DOM, fine-grained reactivity, and Web Components.
 
 No JSX.

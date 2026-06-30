@@ -10,12 +10,22 @@ import type {
 	ComponentChildren,
 	ComponentConstructor,
 	ComponentElement,
+	ComponentInvocationArg,
 	ComponentInvocationOptions,
+	ComponentInvocationChildrenToken,
+	ComponentInvocationSlotToken,
 } from "./component-types.ts";
+
+interface InvocationState {
+	props: Record<string, unknown>;
+	hostTokens: ChildValue[];
+	projectedChildren: ChildValue[];
+	outputCallbacks: Record<string, (detail: unknown) => unknown>;
+}
 
 export function invokeComponent<TComponent extends BaseComponent>(
 	component: ComponentConstructor<TComponent>,
-	options: ComponentInvocationOptions<TComponent> = {},
+	...args: readonly ComponentInvocationArg<TComponent>[]
 ): ComponentElement<TComponent> {
 	const metadata = getComponentMetadata(component as Function);
 	const selector = metadata?.selector ?? component.name;
@@ -31,18 +41,145 @@ export function invokeComponent<TComponent extends BaseComponent>(
 		selector || component.name,
 	) as ComponentElement<TComponent>;
 
-	const { children, ...directProps } = options;
-	const childValues = toChildArray(children);
-	const outputCallbacks: Record<string, (detail: unknown) => unknown> = {};
+	const state: InvocationState = {
+		props: {},
+		hostTokens: [],
+		projectedChildren: [],
+		outputCallbacks: {},
+	};
+
+	for (const arg of args) {
+		collectInvocationArg(arg, metadata, state);
+	}
 
 	validateRequiredInvocationInputs(
 		metadata,
-		directProps,
-		childValues,
+		state.props,
+		state.projectedChildren,
 		selector || component.name,
 	);
 
-	for (const [key, value] of Object.entries(directProps)) {
+	applyDirectProps(element, metadata, state.props, state.outputCallbacks);
+	setComponentOutputCallbacks(element, state.outputCallbacks);
+
+	for (const token of state.hostTokens) {
+		appendChildValue(element as unknown as ParentNode, token);
+	}
+
+	if (metadata && metadata.childrenKeys.size > 0) {
+		if (state.projectedChildren.length > 0) {
+			applyChildren(element, metadata, state.projectedChildren);
+		}
+		return element;
+	}
+
+	if (state.projectedChildren.length > 0) {
+		appendChildValue(element as unknown as ParentNode, state.projectedChildren);
+	}
+
+	return element;
+}
+
+function collectInvocationArg<TComponent extends BaseComponent>(
+	value: ComponentInvocationArg<TComponent>,
+	metadata: ReturnType<typeof getComponentMetadata>,
+	state: InvocationState,
+): void {
+	if (Array.isArray(value)) {
+		for (const item of value) {
+			collectInvocationArg(
+				item as ComponentInvocationArg<TComponent>,
+				metadata,
+				state,
+			);
+		}
+		return;
+	}
+
+	if (isInvocationPropsObject(value)) {
+		mergeInvocationOptions(value, metadata, state);
+		return;
+	}
+
+	if (isComponentInvocationChildrenToken(value)) {
+		collectInvocationChildren(value.children, metadata, state);
+		return;
+	}
+
+	if (isComponentInvocationSlotToken(value)) {
+		state.props[value.name] = createFragment(...value.children);
+		return;
+	}
+
+	if (isProjectedInvocationChild(value)) {
+		state.projectedChildren.push(value);
+		return;
+	}
+
+	state.hostTokens.push(value as ChildValue);
+}
+
+function mergeInvocationOptions<TComponent extends BaseComponent>(
+	options: ComponentInvocationOptions<TComponent>,
+	metadata: ReturnType<typeof getComponentMetadata>,
+	state: InvocationState,
+): void {
+	for (const [key, value] of Object.entries(options)) {
+		if (key === "children") {
+			collectInvocationChildren(value, metadata, state);
+			continue;
+		}
+
+		state.props[key] = value;
+	}
+}
+
+function collectInvocationChildren(
+	value: ComponentChildren,
+	metadata: ReturnType<typeof getComponentMetadata>,
+	state: InvocationState,
+): void {
+	if (value === undefined || value === null) {
+		return;
+	}
+
+	if (Array.isArray(value)) {
+		for (const item of value) {
+			collectInvocationChildren(item, metadata, state);
+		}
+		return;
+	}
+
+	if (isInvocationPropsObject(value)) {
+		mergeInvocationOptions(value, metadata, state);
+		return;
+	}
+
+	if (isComponentInvocationChildrenToken(value)) {
+		collectInvocationChildren(value.children, metadata, state);
+		return;
+	}
+
+	if (isComponentInvocationSlotToken(value)) {
+		state.props[value.name] = createFragment(...value.children);
+		return;
+	}
+
+	if (isProjectedInvocationChild(value)) {
+		state.projectedChildren.push(value);
+		return;
+	}
+
+	state.hostTokens.push(value as ChildValue);
+}
+
+function applyDirectProps<TComponent extends BaseComponent>(
+	element: TComponent,
+	metadata: ReturnType<typeof getComponentMetadata>,
+	props: Record<string, unknown>,
+	outputCallbacks: Record<string, (detail: unknown) => unknown>,
+): void {
+	for (const [key, value] of Object.entries(props)) {
 		if (metadata?.events.has(key)) {
 			if (typeof value === "function") {
 				outputCallbacks[key] = value as (detail: unknown) => unknown;
@@ -52,14 +189,6 @@ export function invokeComponent<TComponent extends BaseComponent>(
 
 		(element as unknown as Record<string, unknown>)[key] = value;
 	}
-
-	setComponentOutputCallbacks(element, outputCallbacks);
-
-	if (childValues.length > 0) {
-		applyChildren(element, metadata, childValues);
-	}
-
-	return element;
 }
 
 function validateRequiredInvocationInputs(
@@ -129,10 +258,73 @@ function applyChildren<TComponent extends BaseComponent>(
 	appendChildValue(element as unknown as ParentNode, children);
 }
 
-function toChildArray(value?: ComponentChildren): readonly ChildValue[] {
-	if (value === undefined) {
-		return [];
+function isInvocationPropsObject<TComponent extends BaseComponent>(
+	value: unknown,
+): value is ComponentInvocationOptions<TComponent> {
+	if (typeof value !== "object" || value === null || Array.isArray(value)) {
+		return false;
 	}
 
-	return Array.isArray(value) ? value : [value];
+	if (isNodeLike(value)) {
+		return false;
+	}
+
+	const record = value as Record<string, unknown>;
+	if (typeof record.kind === "string") {
+		return false;
+	}
+
+	if (
+		typeof record.mode === "string" &&
+		typeof record.toSnapshot === "function"
+	) {
+		return false;
+	}
+
+	if (typeof record.current !== "undefined") {
+		return false;
+	}
+
+	return true;
+}
+
+function isComponentInvocationChildrenToken(
+	value: unknown,
+): value is ComponentInvocationChildrenToken {
+	return (
+		typeof value === "object" &&
+		value !== null &&
+		(value as { kind?: string }).kind === "component-children"
+	);
+}
+
+function isComponentInvocationSlotToken(
+	value: unknown,
+): value is ComponentInvocationSlotToken {
+	return (
+		typeof value === "object" &&
+		value !== null &&
+		(value as { kind?: string }).kind === "component-slot"
+	);
+}
+
+function isProjectedInvocationChild(value: unknown): value is ChildValue {
+	return (
+		typeof value === "string" ||
+		typeof value === "number" ||
+		typeof value === "bigint" ||
+		typeof value === "boolean" ||
+		isNodeLike(value)
+	);
+}
+
+function isNodeLike(value: unknown): value is { nodeType: number } {
+	return (
+		typeof value === "object" &&
+		value !== null &&
+		typeof Reflect.get(
+			value as Record<string | symbol, unknown>,
+			"nodeType",
+		) === "number"
+	);
 }

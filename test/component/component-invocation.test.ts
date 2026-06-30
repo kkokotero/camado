@@ -58,14 +58,13 @@ test("Component invocation applies props, children, and slot fields", () => {
 				return fragment as unknown as DocumentFragment;
 			},
 			createTextNode(value: string) {
-				return { nodeValue: value } as unknown as Text;
+				return { nodeType: 3, textContent: value } as unknown as Text;
 			},
 		} as unknown as Document;
 
 		const invocation = InvocationTest.component();
-		const element = invocation({
+		const element = invocation(Text("child"), {
 			label: "hello",
-			children: Text("child"),
 			footer: Text("slot"),
 		});
 

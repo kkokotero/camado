@@ -19,7 +19,11 @@ export type {
 	ComponentConstructor,
 	ComponentElement,
 	ComponentFactory,
+	ComponentInvocationArg,
+	ComponentInvocationChildrenToken,
 	ComponentInvocationOptions,
+	ComponentInvocationSlotToken,
+	ComponentInvocationToken,
 	ComponentProps,
 } from "./component-types.ts";
 export { Property } from "./property.ts";

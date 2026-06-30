@@ -37,6 +37,26 @@ export type ComponentInvocationOptions<TComponent = object> =
 			children?: ComponentChildren;
 		};
 
+export interface ComponentInvocationChildrenToken {
+	readonly kind: "component-children";
+	readonly children: readonly ChildValue[];
+}
+
+export interface ComponentInvocationSlotToken {
+	readonly kind: "component-slot";
+	readonly name: string;
+	readonly children: readonly ChildValue[];
+}
+
+export type ComponentInvocationToken =
+	| ComponentInvocationChildrenToken
+	| ComponentInvocationSlotToken;
+
+export type ComponentInvocationArg<TComponent = object> =
+	| ComponentInvocationOptions<TComponent>
+	| ComponentInvocationToken
+	| ChildValue;
+
 export type ComponentConstructor<TComponent = object> = abstract new (
 	...args: any[]
 ) => TComponent;
@@ -47,8 +67,9 @@ export type ComponentElement<TComponent extends BaseComponent> = HTMLElement &
 		disconnectedCallback(): void;
 	};
 
-export type ComponentFactory<TComponent extends BaseComponent> = ((
-	options?: ComponentInvocationOptions<TComponent>,
-) => ComponentElement<TComponent>) & {
+export type ComponentFactory<TComponent extends BaseComponent> = {
+	(
+		...args: readonly ComponentInvocationArg<TComponent>[]
+	): ComponentElement<TComponent>;
 	ctor?: ComponentConstructor<TComponent>;
 };
